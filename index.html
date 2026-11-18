@@ -1,112 +1,1356 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>英语口语练习</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>口语练习站 · Speaking Coach</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%232F6B5E' d='M12 3C6.5 3 2 6.7 2 11.3c0 2.6 1.5 4.9 3.9 6.4-.2 1.2-.8 2.4-1.6 3.3 1.7-.2 3.3-.9 4.5-1.8 1 .3 2.1.5 3.2.5 5.5 0 10-3.7 10-8.2S17.5 3 12 3z'/%3E%3Cpath fill='%23F5F2EA' d='M7 10h1.5v3H7zM11 9h1.5v5H11zM15 10h1.5v3H15z'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=Noto+Serif+SC:wght@600;700&display=swap">
 <style>
-*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,sans-serif}
-body{background:#f5f7fa;color:#222;padding:16px;max-width:700px;margin:0 auto}
-header{text-align:center;margin-bottom:20px}
-h1{font-size:22px;margin-bottom:8px}
-.tab{display:flex;gap:6px;margin-bottom:16px}
-.tab button{flex:1;padding:10px;border:none;border-radius:8px;background:#e8edf6;font-size:15px;cursor:pointer}
-.tab button.active{background:#2b65d9;color:#fff}
-.box{background:#fff;border-radius:12px;padding:16px;box-shadow:0 2px 8px #00000012;margin-bottom:16px}
-.sentence{font-size:18px;line-height:1.6;margin-bottom:12px}
-.ctrl{display:flex;gap:8px;flex-wrap:wrap}
-button{padding:10px 14px;border-radius:8px;border:none;background:#2b65d9;color:#fff;cursor:pointer;font-size:14px}
-button.secondary{background:#e2e8f0;color:#222}
-.info{font-size:13px;color:#666;margin-top:10px}
-#log{margin-top:12px;font-size:13px;color:#444;min-height:60px}
+/* ============ 设计变量 ============ */
+:root{
+  --bg:#F5F2EA;
+  --bg-soft:#EDE8DC;
+  --card:#FFFFFF;
+  --ink:#1E2420;
+  --ink-2:#4A524C;
+  --ink-3:#8A9189;
+  --line:#E3DDD0;
+  --primary:#2F6B5E;
+  --primary-deep:#235247;
+  --primary-soft:#E3EEEA;
+  --ok:#3E8E6E;
+  --ok-soft:#E4F1EB;
+  --warn:#D9A441;
+  --warn-soft:#F7EDD8;
+  --bad:#C25B4E;
+  --bad-soft:#F8E7E4;
+  --radius:16px;
+  --radius-sm:10px;
+  --shadow:0 1px 2px rgba(30,36,32,.06),0 6px 18px rgba(30,36,32,.07);
+  --font-sans:"Noto Sans SC",-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+  --font-serif:"Noto Serif SC",Georgia,"Times New Roman",serif;
+  --font-en:Georgia,"Times New Roman",var(--font-sans);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{
+  font-family:var(--font-sans);
+  background:var(--bg);
+  color:var(--ink);
+  line-height:1.6;
+  min-height:100vh;
+}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--primary);outline-offset:2px;border-radius:6px}
+
+/* ============ 布局骨架 ============ */
+.app{max-width:880px;margin:0 auto;padding:0 16px 96px}
+.topbar{
+  position:sticky;top:0;z-index:20;
+  background:rgba(245,242,234,.92);backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--line);
+}
+.topbar-inner{max-width:880px;margin:0 auto;padding:14px 16px;display:flex;align-items:center;gap:12px}
+.brand{display:flex;align-items:center;gap:10px}
+.brand-mark{width:34px;height:34px;border-radius:10px;background:var(--primary);display:grid;place-items:center;flex:none}
+.brand-mark svg{width:20px;height:20px}
+.brand-title{font-family:var(--font-serif);font-weight:700;font-size:18px;letter-spacing:.02em}
+.brand-sub{font-size:12px;color:var(--ink-3)}
+.topbar-spacer{flex:1}
+.topbar-streak{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ink-2);background:var(--bg-soft);padding:6px 12px;border-radius:999px}
+
+/* 底部导航 */
+.tabbar{
+  position:fixed;left:0;right:0;bottom:0;z-index:30;
+  background:var(--card);border-top:1px solid var(--line);
+}
+.tabbar-inner{max-width:880px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr)}
+.tab{
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  padding:10px 4px 12px;font-size:11px;color:var(--ink-3);
+}
+.tab svg{width:22px;height:22px}
+.tab.active{color:var(--primary);font-weight:500}
+
+/* 视图切换 */
+.view{display:none;padding-top:12px}
+.view.active{display:block;animation:fadeIn .22s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.view.active{animation:none}}
+
+/* ============ 通用组件 ============ */
+.section-title{font-family:var(--font-serif);font-size:20px;font-weight:700;margin:8px 0 4px}
+.section-desc{font-size:13px;color:var(--ink-2);margin-bottom:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  padding:11px 18px;border-radius:var(--radius-sm);font-size:15px;font-weight:500;
+  transition:background .15s ease,transform .1s ease;
+}
+.btn:active{transform:scale(.98)}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-primary:hover{background:var(--primary-deep)}
+.btn-ghost{background:var(--bg-soft);color:var(--ink)}
+.btn-ghost:hover{background:var(--line)}
+.btn-soft{background:var(--primary-soft);color:var(--primary)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn svg{width:18px;height:18px}
+.chip{
+  display:inline-flex;align-items:center;gap:4px;padding:4px 11px;border-radius:999px;
+  font-size:12px;background:var(--bg-soft);color:var(--ink-2);border:1px solid transparent;
+}
+.chip.active{background:var(--primary);color:#fff}
+.muted{color:var(--ink-3);font-size:12px}
+.empty{
+  text-align:center;padding:48px 20px;color:var(--ink-3);
+}
+.empty svg{width:40px;height:40px;margin-bottom:10px;opacity:.5}
+
+/* 分类与难度标签 */
+.cat-daily{background:#E7EEF5;color:#3A6284}
+.cat-show{background:#F3E9F1;color:#844A78}
+.cat-animation{background:#EAF3E6;color:#4E7A3E}
+.cat-literature{background:#F1EBDD;color:#8A6D2F}
+.cat-business{background:#ECEAEF;color:#5A5470}
+.cat-passage{background:#E8ECF3;color:#42567A}
+.lvl{font-size:11px;color:var(--ink-3);border:1px solid var(--line);border-radius:6px;padding:1px 6px}
+
+/* ============ 首页 ============ */
+.hero{padding:16px 18px 14px;margin-bottom:12px}
+.hero-greet{font-size:13px;color:var(--ink-2);margin-bottom:6px}
+.hero h1{font-family:var(--font-serif);font-size:26px;line-height:1.35;margin-bottom:10px}
+.hero-meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.hero-stat{background:var(--bg);border:1px solid var(--line);border-radius:var(--radius-sm);padding:8px 12px;min-width:96px}
+.hero-stat .num{font-size:22px;font-weight:700;font-family:var(--font-en)}
+.hero-stat .lbl{font-size:12px;color:var(--ink-3)}
+.plan-progress{margin-top:10px}
+.plan-progress .bar{height:8px;border-radius:999px;background:var(--bg-soft);overflow:hidden}
+.plan-progress .bar i{display:block;height:100%;background:var(--primary);border-radius:999px;transition:width .3s ease}
+.plan-progress .row{display:flex;justify-content:space-between;font-size:12px;color:var(--ink-2);margin-top:6px}
+
+.daily-block{margin-bottom:12px}
+.daily-block h2{font-size:16px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.session-list{display:flex;flex-direction:column;gap:10px}
+.session-card{padding:14px;display:flex;gap:14px;align-items:flex-start}
+.session-index{
+  width:30px;height:30px;border-radius:10px;background:var(--primary-soft);color:var(--primary);
+  display:grid;place-items:center;font-weight:700;font-family:var(--font-en);flex:none;
+}
+.session-card.done .session-index{background:var(--ok-soft);color:var(--ok)}
+.session-body{flex:1;min-width:0}
+.session-en{font-family:var(--font-en);font-size:17px;line-height:1.5;margin-bottom:3px}
+.session-zh{font-size:13px;color:var(--ink-2)}
+.session-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.session-actions{display:flex;gap:8px;flex:none}
+.icon-btn{
+  width:38px;height:38px;border-radius:10px;background:var(--bg-soft);display:grid;place-items:center;
+}
+.icon-btn svg{width:19px;height:19px}
+.icon-btn:hover{background:var(--line)}
+.icon-btn.on{background:var(--warn-soft);color:var(--warn)}
+
+/* ============ 练习视图 ============ */
+.practice-head{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.practice-head .back{width:38px;height:38px;border-radius:10px;background:var(--card);border:1px solid var(--line);display:grid;place-items:center;flex:none}
+.practice-progress{flex:1}
+.practice-progress .bar{height:8px;border-radius:999px;background:var(--bg-soft);overflow:hidden}
+.practice-progress .bar i{display:block;height:100%;background:var(--primary);border-radius:999px}
+.practice-progress .meta{display:flex;justify-content:space-between;font-size:12px;color:var(--ink-3);margin-top:5px}
+
+.pcard{padding:16px 18px}
+.pcard-cat{display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-wrap:wrap}
+.p-sentence{font-family:var(--font-en);font-size:26px;line-height:1.5;font-weight:600;margin-bottom:10px;overflow-wrap:break-word}
+.p-sentence.is-passage{font-size:20px;line-height:1.7}
+.p-sentence.is-passage div+div{margin-top:10px}
+.session-en,.lib-en{overflow-wrap:break-word}
+.p-zh{font-size:15px;color:var(--ink-2);margin-bottom:8px}
+.p-note{background:var(--bg);border-left:3px solid var(--warn);border-radius:0 var(--radius-sm) var(--radius-sm) 0;padding:10px 14px;font-size:13px;color:var(--ink-2);margin-bottom:12px}
+.p-note b{color:var(--ink)}
+
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:10px}
+.rate-group{display:inline-flex;background:var(--bg-soft);border-radius:10px;padding:3px}
+.rate-group button{padding:6px 12px;border-radius:8px;font-size:13px;color:var(--ink-2)}
+.rate-group button.active{background:var(--card);color:var(--primary);font-weight:600;box-shadow:var(--shadow)}
+
+/* 词高亮 */
+.word-row{display:flex;flex-wrap:wrap;gap:6px 10px;margin:8px 0 10px;font-family:var(--font-en);font-size:20px;line-height:1.7}
+.w{padding:2px 4px;border-radius:6px}
+.w.match{color:var(--ink)}
+.w.miss{color:var(--bad);background:var(--bad-soft);text-decoration:underline wavy var(--bad)}
+.w.extra{color:var(--warn);background:var(--warn-soft)}
+.w.doubt{color:var(--warn)}
+.w .ipa{font-size:12px;color:var(--ink-3);font-family:var(--font-sans);display:block;text-align:center}
+
+/* 录音区 */
+.rec-area{display:flex;flex-direction:column;align-items:center;gap:10px;padding:10px 0 4px}
+.rec-btn{
+  width:72px;height:72px;border-radius:50%;background:var(--primary);color:#fff;
+  display:grid;place-items:center;position:relative;
+}
+.rec-btn svg{width:30px;height:30px}
+.rec-btn.recording{background:var(--bad);animation:pulse 1.4s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(194,91,78,.35)}70%{box-shadow:0 0 0 18px rgba(194,91,78,0)}100%{box-shadow:0 0 0 0 rgba(194,91,78,0)}}
+@media (prefers-reduced-motion:reduce){.rec-btn.recording{animation:none}}
+.rec-hint{font-size:13px;color:var(--ink-2)}
+
+.feedback{margin-top:12px;border-top:1px solid var(--line);padding-top:10px;display:none}
+.feedback.show{display:block}
+.score-ring{display:flex;align-items:center;gap:16px;margin-bottom:10px}
+.score-num{font-family:var(--font-en);font-size:34px;font-weight:700}
+.score-labels{font-size:13px;color:var(--ink-2)}
+.transcript-box{background:var(--bg);border-radius:var(--radius-sm);padding:10px 12px;font-size:14px;margin-bottom:10px}
+.transcript-box .lbl{font-size:12px;color:var(--ink-3);margin-bottom:4px}
+.p-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
+
+.audio-replay{display:flex;align-items:center;gap:10px;margin-top:10px;font-size:13px;color:var(--ink-2)}
+.audio-replay audio{height:36px;flex:1;min-width:120px}
+
+/* 环境自检 */
+.self-check{margin-top:12px;padding-top:10px;border-top:1px dashed var(--line);display:flex;flex-direction:column;gap:6px}
+.sc-row{display:flex;justify-content:space-between;gap:12px;font-size:12.5px}
+.sc-k{color:var(--ink-3)}
+.sc-v{font-weight:500}
+.sc-v.ok{color:var(--ok)}
+.sc-v.bad{color:var(--bad)}
+.sc-v.warn{color:var(--warn)}
+
+/* ============ 词库 ============ */
+.toolbar{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px;align-items:center}
+.search-box{flex:1;min-width:160px;display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:9px 12px}
+.search-box svg{width:17px;height:17px;color:var(--ink-3);flex:none}
+.search-box input{border:none;outline:none;background:none;width:100%}
+.filter-row{display:flex;flex-wrap:wrap;gap:8px}
+.lib-list{display:flex;flex-direction:column;gap:12px}
+.lib-card{padding:16px}
+.lib-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;margin-bottom:6px}
+.lib-en{font-family:var(--font-en);font-size:18px;line-height:1.5}
+.lib-zh{font-size:13px;color:var(--ink-2);margin-bottom:8px}
+.lib-foot{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.lib-actions{display:flex;gap:8px;margin-left:auto}
+
+/* ============ 复习 / 统计 ============ */
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+.stat-cell{padding:16px;text-align:center}
+.stat-cell .num{font-family:var(--font-en);font-size:26px;font-weight:700}
+.stat-cell .lbl{font-size:12px;color:var(--ink-3)}
+.week-chart{padding:18px}
+.week-row{display:grid;grid-template-columns:44px 1fr 34px;gap:10px;align-items:center;margin:10px 0;font-size:13px}
+.week-bar{height:10px;background:var(--bg-soft);border-radius:999px;overflow:hidden}
+.week-bar i{display:block;height:100%;background:var(--primary);border-radius:999px}
+
+/* ============ 更多 / 导出 / 设置 ============ */
+.menu-list{display:flex;flex-direction:column;gap:12px}
+.menu-item{padding:16px;display:flex;align-items:center;gap:14px}
+.menu-item .icon{width:40px;height:40px;border-radius:12px;background:var(--primary-soft);color:var(--primary);display:grid;place-items:center;flex:none}
+.menu-item .icon svg{width:20px;height:20px}
+.menu-item .meta{flex:1;min-width:0}
+.menu-item .meta h3{font-size:15px;font-weight:600}
+.menu-item .meta p{font-size:12px;color:var(--ink-3)}
+.export-group{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+.settings-row{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid var(--line);gap:12px}
+.settings-row:last-child{border-bottom:none}
+.switch{position:relative;width:46px;height:26px;background:var(--line);border-radius:999px;transition:background .15s;flex:none}
+.switch.on{background:var(--primary)}
+.switch::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:transform .15s}
+.switch.on::after{transform:translateX(20px)}
+select{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+textarea{width:100%;min-height:120px;border:1px solid var(--line);border-radius:var(--radius-sm);padding:12px;background:var(--bg);resize:vertical}
+
+.note-banner{background:var(--warn-soft);border-radius:var(--radius-sm);padding:12px 14px;font-size:12.5px;color:var(--ink-2);margin-bottom:16px;line-height:1.6}
+
+@media (max-width:560px){
+  .hero h1{font-size:22px}
+  .p-sentence{font-size:21px}
+  .stat-grid{grid-template-columns:repeat(3,1fr)}
+  .stat-cell{padding:12px 8px}
+  .stat-cell .num{font-size:21px}
+  .brand-sub{display:none}
+  .brand-title{font-size:16px}
+  .topbar-streak{padding:6px 10px;font-size:12px}
+}
 </style>
 </head>
 <body>
-<header>
-<h1>英语口语练习</h1>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <div class="brand-mark">
+        <svg viewBox="0 0 24 24" fill="none"><path fill="#F5F2EA" d="M12 3C6.5 3 2 6.7 2 11.3c0 2.6 1.5 4.9 3.9 6.4-.2 1.2-.8 2.4-1.6 3.3 1.7-.2 3.3-.9 4.5-1.8 1 .3 2.1.5 3.2.5 5.5 0 10-3.7 10-8.2S17.5 3 12 3z"/><path fill="#2F6B5E" d="M7 10h1.5v3H7zM11 9h1.5v5H11zM15 10h1.5v3H15z"/></svg>
+      </div>
+      <div>
+        <div class="brand-title">口语练习站</div>
+        <div class="brand-sub">Speaking Coach · 自用跟读训练</div>
+      </div>
+    </div>
+    <div class="topbar-spacer"></div>
+    <div class="topbar-streak" id="streakBadge"></div>
+  </div>
 </header>
-<div class="tab">
-<button class="active" data-type="en">英文句子</button>
-<button data-type="cn">中文对照</button>
-</div>
-<div class="box">
-<div class="sentence" id="sentence">Click 开始</div>
-<div class="ctrl">
-<button id="readBtn">朗读</button>
-<button id="recBtn" class="secondary">录音识别</button>
-<button id="nextBtn" class="secondary">下一句</button>
-</div>
-<div id="log"></div>
-</div>
-<div class="box info">
-<p>提示：苹果Safari打开，需要允许麦克风权限；识别效果受网络、发音影响</p>
-</div>
+
+<main class="app">
+  <!-- 视图：今日训练 -->
+  <section class="view" id="view-home"></section>
+  <!-- 视图：跟读练习 -->
+  <section class="view" id="view-practice"></section>
+  <!-- 视图：例句库 -->
+  <section class="view" id="view-library"></section>
+  <!-- 视图：复习（收藏/错题） -->
+  <section class="view" id="view-review"></section>
+  <!-- 视图：统计 -->
+  <section class="view" id="view-stats"></section>
+  <!-- 视图：更多（导出/导入/设置） -->
+  <section class="view" id="view-more"></section>
+</main>
+
+<nav class="tabbar">
+  <div class="tabbar-inner">
+    <button class="tab" data-route="home">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>
+      今日
+    </button>
+    <button class="tab" data-route="library">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H10v16H5.5A1.5 1.5 0 0 1 4 18.5z"/><path d="M14 4h4.5A1.5 1.5 0 0 1 20 5.5v13a1.5 1.5 0 0 1-1.5 1.5H14z"/></svg>
+      词库
+    </button>
+    <button class="tab" data-route="review">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l2.4 5.3 5.6.6-4.2 3.8 1.2 5.6L12 15.4 7 18.3l1.2-5.6L4 8.9l5.6-.6z"/></svg>
+      复习
+    </button>
+    <button class="tab" data-route="stats">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>
+      统计
+    </button>
+    <button class="tab" data-route="more">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.2a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.2a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3h.1a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.2a1.7 1.7 0 0 0 1 1.5h.1a1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9v.1a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.2a1.7 1.7 0 0 0-1.5 1z"/></svg>
+      更多
+    </button>
+  </div>
+</nav>
+
 <script>
-const sentences = [
-{en:"I get up at seven every morning.",cn:"我每天早上七点起床。"},
-{en:"What are you going to do this weekend?",cn:"你这个周末打算做什么？"},
-{en:"I like reading books in my free time.",cn:"我空闲的时候喜欢看书。"},
-{en:"The weather is nice today.",cn:"今天天气很好。"},
-{en:"Could you help me please?",cn:"可以请你帮我一下吗？"},
-{en:"I’m learning English now.",cn:"我现在正在学英语。"},
-{en:"Where do you come from?",cn:"你来自哪里？"},
-{en:"How much does it cost?",cn:"这个多少钱？"},
-{en:"I will try my best.",cn:"我会尽我最大努力。"},
-{en:"See you tomorrow.",cn:"明天见。"}
+/* ==================== 内置例句库 ====================
+ * cat: daily 日常 / show 影视口语 / animation 动画 / literature 名著 / business 商务
+ * level: A2 入门 / B1 进阶 / B2 提高
+ * 说明：名著均取自公版文本；影视类为原创生活化表达，未使用任何受版权保护的台词或音频。
+ */
+const RAW_DATA = [
+  // ---------- 日常会话 ----------
+  {id:"d01",en:"Could you say that again more slowly, please?",zh:"你能再说慢一点吗？",cat:"daily",level:"A2",tags:["连读","礼貌请求"],note:"Could you 连读为 /kʊdʒu/；slowly 的 /l/ 要清晰，别吞掉。"},
+  {id:"d02",en:"I'm just looking around, thank you.",zh:"我只是随便看看，谢谢。",cat:"daily",level:"A2",tags:["弱读"],note:"just 中 t 弱读；looking around 可连读。"},
+  {id:"d03",en:"What do you usually do on weekends?",zh:"你周末通常做什么？",cat:"daily",level:"A2",tags:["重音"],note:"usually 重音在第一个音节 /ˈjuːʒəli/；weekends 重音在 week。"},
+  {id:"d04",en:"I'd like to book a table for two, please.",zh:"我想订一张两人桌。",cat:"daily",level:"B1",tags:["连读","缩读"],note:"I'd like to 中 like to 常弱读为 /laɪktə/；book 长元音 /ʊ/。"},
+  {id:"d05",en:"How long does it take to get to the airport?",zh:"到机场要多久？",cat:"daily",level:"B1",tags:["弱读","语速"],note:"does it take 连读；airport 双音节，重音在前。"},
+  {id:"d06",en:"Sorry, I didn't catch your name.",zh:"抱歉，我没听清你的名字。",cat:"daily",level:"B1",tags:["口语习语"],note:"catch 此处意为“听清”；didn't 的 /t/ 可失爆。"},
+  {id:"d07",en:"Could you recommend something to eat?",zh:"你能推荐点吃的吗？",cat:"daily",level:"B1",tags:["重音","词首辅音"],note:"recommend 重音在第二音节 /ˌrekəˈmend/；something 的 /θ/ 咬舌。"},
+  {id:"d08",en:"I'm having a hard time following the lecture.",zh:"我有点跟不上这个讲座。",cat:"daily",level:"B2",tags:["习语","连读"],note:"have a hard time doing 是固定搭配；following 注意 /l/。"},
+  {id:"d09",en:"Let's grab a coffee after work.",zh:"下班一起喝杯咖啡吧。",cat:"daily",level:"B1",tags:["连读","口语缩略"],note:"grab a 连读；after work 中 t 可轻触。"},
+  {id:"d10",en:"It's up to you, I don't mind.",zh:"听你的，我都行。",cat:"daily",level:"B1",tags:["习语"],note:"up to you 连读；mind 的 /d/ 尾音轻收。"},
+  {id:"d11",en:"I've been learning English for about two years.",zh:"我学英语大概两年了。",cat:"daily",level:"B1",tags:["完成进行时"],note:"I've been 连读；learning 的 /r/ 卷舌；about 的 /aʊ/。"},
+  {id:"d12",en:"Could you explain that in a simpler way?",zh:"你能用更简单的方式解释一下吗？",cat:"daily",level:"B1",tags:["重音"],note:"explain 重音在第二音节；simpler 比较级别漏掉 /r/。"},
+  {id:"d13",en:"I'm not really into spicy food.",zh:"我不太爱吃辣。",cat:"daily",level:"B1",tags:["习语"],note:"be into 表示“喜欢”；spicy 的 /aɪ/ 双元音饱满。"},
+  {id:"d14",en:"How's everything going with your new job?",zh:"你的新工作进展怎么样？",cat:"daily",level:"B1",tags:["连读"],note:"How's everything 连读；going with 可衔接。"},
+  {id:"d15",en:"Could I have the bill, please?",zh:"请把账单给我好吗？",cat:"daily",level:"A2",tags:["礼貌请求"],note:"bill 双元音 /ɪl/；have 弱读为 /həv/。"},
+
+  // ---------- 影视口语（原创生活化表达） ----------
+  {id:"s01",en:"Look who finally decided to show up.",zh:"看看是谁终于肯露面了。",cat:"show",level:"B1",tags:["连读","语气"],note:"show up 是固定短语“露面”；decided to 中 t 弱读。"},
+  {id:"s02",en:"You have no idea what I've been through.",zh:"你根本不知道我经历了什么。",cat:"show",level:"B2",tags:["习语","完成时"],note:"have no idea 连读；been through 表示“经历（磨难）”。"},
+  {id:"s03",en:"That's easier said than done, you know.",zh:"说起来容易做起来难，你懂的。",cat:"show",level:"B2",tags:["习语","比较级"],note:"easier said than done 是常用谚语；than 弱读。"},
+  {id:"s04",en:"I didn't see this coming at all.",zh:"我完全没料到会这样。",cat:"show",level:"B1",tags:["口语习语"],note:"see sth coming 表示“预见到”；at all 尾音轻读。"},
+  {id:"s05",en:"Give me one good reason why I should believe you.",zh:"给我一个该相信你的像样理由。",cat:"show",level:"B2",tags:["重音","长句停顿"],note:"reason why 中 /n/ 衔接；长句在 reason 后停顿。"},
+  {id:"s06",en:"We need to talk, and it can't wait.",zh:"我们得谈谈，这事不能再拖。",cat:"show",level:"B1",tags:["停顿","弱读"],note:"can't 在美音中 /kænt/；talk 后短暂停顿表郑重。"},
+  {id:"s07",en:"You're making a big deal out of nothing.",zh:"你这是小题大做。",cat:"show",level:"B2",tags:["习语"],note:"make a big deal out of 是固定搭配；nothing 的 /θ/ 咬舌。"},
+  {id:"s08",en:"Trust me, this is going to work out.",zh:"相信我，这事会顺利的。",cat:"show",level:"B1",tags:["习语"],note:"work out 表示“成功、解决”；going to 口语常缩为 gonna。"},
+  {id:"s09",en:"I owe you one for what you did today.",zh:"你今天帮了我，我欠你个人情。",cat:"show",level:"B2",tags:["习语"],note:"owe /oʊ/ 双元音；owe you one 连读。"},
+  {id:"s10",en:"Don't worry, I've got your back.",zh:"别担心，有我支持你。",cat:"show",level:"B1",tags:["习语"],note:"have someone's back 意为“支持某人”；got 短元音。"},
+  {id:"s11",en:"It's never too late to start over.",zh:"重新开始永远都不晚。",cat:"show",level:"B1",tags:["不定式"],note:"start over 表示“重来”；never 的 /v/ 上齿触下唇。"},
+  {id:"s12",en:"What's the worst that could happen?",zh:"最坏又能怎样呢？",cat:"show",level:"B1",tags:["连读","虚拟语气"],note:"worst that 连读；could happen 中 /d/ 可失爆。"},
+
+  // ---------- 动画 / 童趣 ----------
+  {id:"a01",en:"The little rabbit hopped across the green meadow.",zh:"小兔子跳过了绿色的草地。",cat:"animation",level:"A2",tags:["辅音连缀"],note:"rabbit 双写 b；hopped 的 /pt/ 尾音轻收；meadow 重音在前。"},
+  {id:"a02",en:"Once upon a time, there was a friendly dragon.",zh:"从前，有一只友善的小龙。",cat:"animation",level:"A2",tags:["故事开场"],note:"Once upon a time 是童话开场白；friendly 的 /fr/ 辅音连缀。"},
+  {id:"a03",en:"We can build a castle out of blocks today.",zh:"我们今天可以用积木搭一座城堡。",cat:"animation",level:"A2",tags:["连读"],note:"build a 连读；castle 的 /t/ 不发音；blocks 尾音 /ks/。"},
+  {id:"a04",en:"The stars twinkled like tiny lights in the sky.",zh:"星星像天空中的小光点一样闪烁。",cat:"animation",level:"B1",tags:["辅音连缀"],note:"twinkled 中 /tw/；stars 的 /ts/；sky 双元音 /aɪ/。"},
+  {id:"a05",en:"Don't be afraid, I'll stay right beside you.",zh:"别害怕，我会一直陪在你身边。",cat:"animation",level:"A2",tags:["安慰用语"],note:"afraid 重音在第二音节；beside 的 /s/ 清辅音。"},
+  {id:"a06",en:"The puppy wagged its tail and ran to the door.",zh:"小狗摇着尾巴跑向门口。",cat:"animation",level:"A2",tags:["过去式"],note:"wagged /wæɡd/；its 不要读成 it's；tail 双元音 /eɪ/。"},
+  {id:"a07",en:"If you try again, you will get better.",zh:"再试一次，你就会进步的。",cat:"animation",level:"A2",tags:["条件句"],note:"better 双 /t/ 美音卷舌；again 重音在后。"},
+  {id:"a08",en:"The wind carried the leaves across the garden.",zh:"风把树叶吹过了花园。",cat:"animation",level:"B1",tags:["过去式","v/w"],note:"wind 此处名词 /wɪnd/；leaves 的 /v/ 上齿触下唇，勿读成 w。"},
+  {id:"a09",en:"We shared our snacks and laughed all afternoon.",zh:"我们分享零食，笑了一整个下午。",cat:"animation",level:"B1",tags:["连读"],note:"shared our 连读；laughed 的 /f/ 清辅音；afternoon 重音在后半。"},
+  {id:"a10",en:"A rainbow appeared after the rain stopped.",zh:"雨停后出现了一道彩虹。",cat:"animation",level:"B1",tags:["重音"],note:"rainbow 复合词重音在前；appeared 重音在第二音节。"},
+
+  // ---------- 名著经典（公版文本） ----------
+  {id:"l01",en:"To be, or not to be, that is the question.",zh:"生存还是毁灭，这是一个值得思考的问题。",cat:"literature",level:"B2",tags:["莎剧","停顿"],note:"莎剧名句；question 重音在前；朗读时在逗号处停顿。",source:"Shakespeare, Hamlet"},
+  {id:"l02",en:"It was the best of times, it was the worst of times.",zh:"那是最好的时代，也是最坏的时代。",cat:"literature",level:"B2",tags:["对仗","对比"],note:"首尾对仗，best 与 worst 对比重读；of 弱读 /əv/。",source:"Dickens, A Tale of Two Cities"},
+  {id:"l03",en:"It is a truth universally acknowledged that a single man in possession of a good fortune must be in want of a wife.",zh:"凡是有钱的单身汉，必定想娶位太太，这是一条举世公认的真理。",cat:"literature",level:"B2",tags:["长句","正式语体"],note:"长句按意群停顿；universally 重音在第三音节；acknowledged 注意 /n/。",source:"Austen, Pride and Prejudice"},
+  {id:"l04",en:"I am no bird; and no net ensnares me.",zh:"我不是鸟儿，没有罗网能困住我。",cat:"literature",level:"B2",tags:["文学语体"],note:"ensnare /ɪnˈsneər/ 意为“诱捕”；me 尾音轻扬。",source:"C. Brontë, Jane Eyre"},
+  {id:"l05",en:"When you have eliminated the impossible, whatever remains, however improbable, must be the truth.",zh:"排除一切不可能之后，剩下的无论多么不可思议，必定就是真相。",cat:"literature",level:"B2",tags:["长句","定语从句"],note:"impossible 与 improbable 对比；长句在逗号处换气。",source:"Conan Doyle, Sherlock Holmes"},
+  {id:"l06",en:"What is essential is invisible to the eye.",zh:"真正重要的东西，用眼睛是看不见的。",cat:"literature",level:"B1",tags:["文学名句"],note:"essential 重音在第二音节；invisible 前缀 in- 轻读。",source:"Saint-Exupéry, The Little Prince"},
+  {id:"l07",en:"The mass of men lead lives of quiet desperation.",zh:"大多数人都在平静的绝望中生活。",cat:"literature",level:"B2",tags:["文学语体"],note:"desperation 重音在第三音节；mass 的 /s/ 清辅音。",source:"Thoreau, Walden"},
+  {id:"l08",en:"A penny saved is a penny earned.",zh:"省一分就是赚一分。",cat:"literature",level:"A2",tags:["谚语"],note:"saved 与 earned 对仗；penny 的 /n/ 清晰。",source:"Franklin"},
+  {id:"l09",en:"Early to bed and early to rise makes a man healthy, wealthy, and wise.",zh:"早睡早起使人健康、富足又明智。",cat:"literature",level:"B1",tags:["排比"],note:"healthy / wealthy / wise 三词排比递进；rise 的 /z/ 浊辅音。",source:"Franklin"},
+  {id:"l10",en:"All that glitters is not gold.",zh:"闪光的未必都是金子。",cat:"literature",level:"B1",tags:["谚语","双关"],note:"glitter 双 /l/；gold 的 /oʊ/ 饱满。",source:"Shakespeare, The Merchant of Venice"},
+  {id:"l11",en:"The fool doth think he is wise, but the wise man knows himself to be a fool.",zh:"愚人自以为聪明，智者却有自知之明。",cat:"literature",level:"B2",tags:["古语 doth"],note:"doth 古英语 does，读 /dʌθ/；fool 长元音 /uː/。",source:"Shakespeare, As You Like It"},
+  {id:"l12",en:"That which does not kill us makes us stronger.",zh:"凡不能毁灭我的，必使我更强大。",cat:"literature",level:"B1",tags:["定语从句"],note:"stronger 比较级 /ŋ/ 后接 /g/；which 咬舌 /wɪtʃ/。",source:"Nietzsche"},
+  {id:"l13",en:"He who has a why to live can bear almost any how.",zh:"知道为何而活的人，几乎能承受任何一种生活。",cat:"literature",level:"B2",tags:["格言"],note:"bear 此处意为“承受”，同音 bare；almost 重音在前。",source:"Nietzsche"},
+
+  // ---------- 商务 / 考试 ----------
+  {id:"b01",en:"I'd like to follow up on the proposal we discussed.",zh:"我想跟进一下我们讨论过的方案。",cat:"business",level:"B2",tags:["商务短语"],note:"follow up on 是固定搭配；proposal 重音在第二音节。"},
+  {id:"b02",en:"Could we schedule a meeting to review the timeline?",zh:"我们能否安排会议评审一下时间进度？",cat:"business",level:"B2",tags:["商务用语"],note:"schedule 美音 /ˈskedʒuːl/；timeline 复合词重音在前。"},
+  {id:"b03",en:"Please find the attached report for your reference.",zh:"随附报告，供您参考。",cat:"business",level:"B1",tags:["邮件套话"],note:"attached 重音在第二音节；reference 重音在前。"},
+  {id:"b04",en:"We need to align on the priorities before Friday.",zh:"我们需要在周五前对齐工作优先级。",cat:"business",level:"B2",tags:["商务短语"],note:"align on 意为“就……达成一致”；priorities 重音在第二音节。"},
+  {id:"b05",en:"The quarterly results are better than expected.",zh:"季度业绩好于预期。",cat:"business",level:"B2",tags:["商务数字"],note:"quarterly 重音在前；expected 注意 /k/ 轻读。"},
+  {id:"b06",en:"Could you send me the updated version by tomorrow?",zh:"你能在明早前把更新版发给我吗？",cat:"business",level:"B1",tags:["截止时间"],note:"updated 重音在第二音节；version 的 /ʒ/ 浊辅音。"},
+  {id:"b07",en:"Let's circle back to this point in the next call.",zh:"我们下次通话再回到这一点上。",cat:"business",level:"B2",tags:["商务习语"],note:"circle back 是商务高频表达；point 双元音 /ɔɪ/。"},
+  {id:"b08",en:"I appreciate your feedback on the draft.",zh:"感谢你对初稿提出的意见。",cat:"business",level:"B1",tags:["礼貌表达"],note:"appreciate 重音在第二音节；feedback 重音在前。"},
+  {id:"b09",en:"The client asked us to adjust the delivery plan.",zh:"客户要求我们调整交付计划。",cat:"business",level:"B2",tags:["商务用语"],note:"adjust 重音在第二音节；delivery 重音在前。"},
+  {id:"b10",en:"We should keep stakeholders informed of the progress.",zh:"我们应让相关方随时了解进展。",cat:"business",level:"B2",tags:["商务句式"],note:"keep sb informed of 是固定结构；stakeholders 音节较多，注意断句。"},
+
+  // ---------- 演讲 / 文章段落（每日结尾练习） ----------
+  {id:"p01",kind:"passage",en:"Four score and seven years ago our fathers brought forth on this continent a new nation, conceived in liberty, and dedicated to the proposition that all men are created equal. Now we are engaged in a great civil war, testing whether that nation, or any nation so conceived and so dedicated, can long endure.",zh:"八十七年前，我们的先辈在这片大陆上创立了一个新国家，它孕育于自由之中，奉行人人平等的原则。如今我们正投身于一场伟大的内战，考验这个国家能否长久存在。",cat:"passage",level:"B2",tags:["演讲","公版"],note:"长句按逗号意群停顿；conceived /kənˈsiːvd/、dedicated 重音在第一音节；civil 中 /v/ 咬唇。",source:"Abraham Lincoln, Gettysburg Address"},
+  {id:"p02",kind:"passage",en:"We hold these truths to be self-evident, that all men are created equal, that they are endowed by their Creator with certain unalienable Rights, that among these are Life, Liberty and the pursuit of Happiness.",zh:"我们认为这些真理不言而喻：人人生而平等，造物主赋予他们若干不可剥夺的权利，其中包括生命权、自由权和追求幸福的权利。",cat:"passage",level:"B2",tags:["文献","公版"],note:"三个 that 排比层层推进；unalienable 音节较多，注意断句；pursuit 重音在第二音节。",source:"The Declaration of Independence"},
+  {id:"p03",kind:"passage",en:"Is life so dear, or peace so sweet, as to be purchased at the price of chains and slavery? I know not what course others may take; but as for me, give me liberty, or give me death!",zh:"生命果真如此宝贵，和平果真如此甜美，竟值得以枷锁和奴役为代价吗？我不知道别人会如何选择；至于我，不自由，毋宁死。",cat:"passage",level:"B2",tags:["演讲","公版"],note:"问句语调上扬；chains and slavery 连读；结尾 give me liberty, or give me death 逐词加重。",source:"Patrick Henry"},
+  {id:"p04",kind:"passage",en:"I went to the woods because I wished to live deliberately, to front only the essential facts of life, and see if I could not learn what it had to teach, and not, when I came to die, discover that I had not lived.",zh:"我步入丛林，是因为我希望活得清醒，只面对生活中最本质的事实，看看能否学到生活要教给我的东西；免得临终时才发现自己从未真正活过。",cat:"passage",level:"B2",tags:["散文","公版"],note:"deliberately 重音在第二音节；essential /ɪˈsenʃl/；长句在 and not 处停顿。",source:"Henry David Thoreau, Walden"},
+  {id:"p05",kind:"passage",en:"Public libraries are quiet places where anyone can read, study, or borrow books. They connect people with knowledge, and they remain an important part of community life even in the age of the internet. A regular reading habit can broaden our view of the world and improve our ability to think clearly.",zh:"公共图书馆是安静的场所，任何人都可以在那里阅读、学习或借阅书籍。即使在互联网时代，它们仍是社区生活的重要部分。长期阅读能拓宽视野，提升清晰思考的能力。",cat:"passage",level:"B1",tags:["时文","原创示例"],note:"定语从句 where anyone... 注意衔接；community 重音在第二音节；broaden /ˈbrɔːdn/。"},
+  {id:"p06",kind:"passage",en:"Working from home offers more flexibility, but it can also blur the line between work and personal life. Taking short walks, keeping regular hours, and setting aside a quiet workspace help people stay focused and protect their well-being. Small daily habits often matter more than occasional grand efforts.",zh:"居家办公带来更多灵活度，但也可能模糊工作与生活的界限。短暂散步、规律作息、留出安静的工作空间，有助于保持专注、维护身心健康。日常小习惯往往比偶尔的大努力更重要。",cat:"passage",level:"B1",tags:["时文","原创示例"],note:"三个动名词主语并列（Taking..., keeping..., setting...）；flexibility 重音在第四音节；well-being 连字符。"},
 ];
-let idx=0;
-let showMode="en";
-const senEl=document.getElementById("sentence");
-const logEl=document.getElementById("log");
-const readBtn=document.getElementById("readBtn");
-const recBtn=document.getElementById("recBtn");
-const nextBtn=document.getElementById("nextBtn");
-const tabs=document.querySelectorAll(".tab button");
+
+/* ==================== 分类元数据 ==================== */
+const CAT_META = {
+  daily:{label:"日常会话",cls:"cat-daily"},
+  show:{label:"影视口语",cls:"cat-show"},
+  animation:{label:"动画童趣",cls:"cat-animation"},
+  literature:{label:"名著经典",cls:"cat-literature"},
+  business:{label:"商务考试",cls:"cat-business"},
+  passage:{label:"演讲片段",cls:"cat-passage"},
+};
+const LEVEL_META = {A2:"A2 入门",B1:"B1 进阶",B2:"B2 提高"};
+</script>
+
+<script>
+/* ==================== 本地存储 ==================== */
+const STORE_KEY = "speakcoach.v1";
+const DEFAULT_STORE = {fav:[], wrong:[], history:{}, minutes:{}, imported:[], settings:{accent:"US", rate:0.9}};
+let store = loadStore();
+
+function loadStore(){
+  try{
+    const raw = localStorage.getItem(STORE_KEY);
+    if(raw){ const parsed = JSON.parse(raw); return Object.assign({}, DEFAULT_STORE, parsed, {settings:Object.assign({}, DEFAULT_STORE.settings, parsed.settings||{})}); }
+  }catch(e){}
+  return JSON.parse(JSON.stringify(DEFAULT_STORE));
+}
+function saveStore(){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(store)); }catch(e){} }
+
+/* ==================== 工具函数 ==================== */
+function todayKey(){
+  const d = new Date();
+  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+}
+function allSentences(){ return RAW_DATA.concat(store.imported); }
+function findSentence(id){ return allSentences().find(s=>s.id===id); }
+function hashCode(str){ let h=0; for(let i=0;i<str.length;i++){ h=(h*31+str.charCodeAt(i))|0; } return Math.abs(h); }
+function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function todayHistory(){ return store.history[todayKey()]||[]; }
+
+/* ==================== 语音示范（TTS） ==================== */
+let ttsVoices = [];
+let speechUnlocked = false;
+function refreshVoices(){ if("speechSynthesis" in window){ ttsVoices = speechSynthesis.getVoices(); } }
+if("speechSynthesis" in window){ refreshVoices(); speechSynthesis.onvoiceschanged = refreshVoices; }
+
+/* iOS Safari 要求语音引擎必须在一次用户点击内被首次触发，先用空语句解锁通道 */
+function unlockSpeech(){
+  if(speechUnlocked || !("speechSynthesis" in window)) return;
+  try{ speechSynthesis.speak(new SpeechSynthesisUtterance("")); }catch(e){}
+  speechUnlocked = true;
+}
+
+function speak(text){
+  if(!("speechSynthesis" in window)){ alert("当前浏览器不支持语音合成示范，请换用 Chrome / Edge。"); return; }
+  unlockSpeech();
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.rate = store.settings.rate;
+  const lang = store.settings.accent==="UK" ? "en-GB" : "en-US";
+  u.lang = lang;
+  const v = ttsVoices.find(v=>v.lang===lang) || ttsVoices.find(v=>v.lang && v.lang.startsWith(lang));
+  if(v) u.voice = v;
+  speechSynthesis.speak(u);
+}
+
+/* ==================== 语音识别与词级对比 ==================== */
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition || null;
+
+function normalizeWords(text){
+  return (text||"").toLowerCase()
+    .replace(/[^a-z0-9' \-]/g," ")
+    .replace(/['\-]/g," ")
+    .trim().split(/\s+/).filter(Boolean);
+}
+function splitSentences(text){
+  const m=(text||"").match(/[^.!?]+[.!?]+/g);
+  return m&&m.length?m:[text||""];
+}
+/* 顺序对齐：返回原句每词状态 match/miss，以及识别多出的词 extra */
+function alignWords(targetText, recognizedText){
+  const t = normalizeWords(targetText);
+  const r = normalizeWords(recognizedText);
+  const res = t.map(w=>({word:w, state:"miss"}));
+  const extras = [];
+  let j = 0;
+  for(let i=0;i<t.length;i++){
+    if(j<r.length && t[i]===r[j]){ res[i].state="match"; j++; continue; }
+    const k = r.indexOf(t[i], j);
+    if(k>-1){ for(let x=j;x<k;x++) extras.push(r[x]); j=k+1; res[i].state="match"; }
+    else { res[i].state="miss"; }
+  }
+  for(let x=j;x<r.length;x++) extras.push(r[x]);
+  return {target:res, extras, matchCount:res.filter(x=>x.state==="match").length};
+}
+function scoreOf(align){ const n=align.target.length; return n? Math.round(align.matchCount/n*100) : 0; }
+function scoreLabel(score){
+  if(score>=85) return {text:"发音不错，继续保持", cls:"ok"};
+  if(score>=70) return {text:"基本到位，个别词再练练", cls:"warn"};
+  if(score>=50) return {text:"有几处没读准，建议重练", cls:"warn"};
+  return {text:"差距较大，先跟读示范再尝试", cls:"bad"};
+}
+
+/* ==================== 路由 ==================== */
+const ROUTES = ["home","library","review","stats","more","practice"];
+function currentRoute(){
+  const h = (location.hash||"#/home").replace("#/","");
+  return ROUTES.includes(h) ? h : "home";
+}
+function navigate(name){ location.hash = "#/"+name; }
+window.addEventListener("hashchange", render);
+
+/* ==================== 学习数据统计 ==================== */
+function keyOfDate(d){ return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+function calcStreak(){
+  let streak=0; const cur=new Date();
+  if(!store.history[todayKey()] || !store.history[todayKey()].length){ cur.setDate(cur.getDate()-1); }
+  while(true){
+    const k=keyOfDate(cur);
+    if(store.history[k] && store.history[k].length){ streak++; cur.setDate(cur.getDate()-1); }
+    else break;
+  }
+  return streak;
+}
+function totalDone(){ return Object.values(store.history).reduce((n,arr)=>n+arr.length,0); }
+function avgScore(){
+  const all=Object.values(store.history).flat();
+  if(!all.length) return 0;
+  return Math.round(all.reduce((s,h)=>s+(h.score||0),0)/all.length);
+}
+function todayAvg(){ const h=todayHistory(); if(!h.length) return 0; return Math.round(h.reduce((s,x)=>s+x.score,0)/h.length); }
+function last7Days(){
+  const out=[];
+  for(let i=6;i>=0;i--){
+    const d=new Date(); d.setDate(d.getDate()-i);
+    const k=keyOfDate(d);
+    const arr=store.history[k]||[];
+    out.push({key:k, label:["日","一","二","三","四","五","六"][d.getDay()], count:arr.length, avg:arr.length?Math.round(arr.reduce((s,x)=>s+x.score,0)/arr.length):0});
+  }
+  return out;
+}
+
+/* ==================== 每日计划 ==================== */
+const DAILY_TARGET = 10; // 短句目标，另加 1 段结尾段落，约 20–30 分钟
+function buildDailyPlan(){
+  const doneToday = todayHistory().map(h=>h.id);
+  const plan=[];
+  // 1) 错题优先复习（最多 3 句，仅短句）
+  store.wrong.filter(id=>findSentence(id)).slice(0,3).forEach(id=>{
+    const s=findSentence(id); if(s && s.kind!=="passage") plan.push(Object.assign({},s,{_review:true}));
+  });
+  // 2) 按日期轮换分类补充短句（段落单独排在最后）
+  const seed=hashCode(todayKey());
+  const cats=Object.keys(CAT_META).filter(k=>k!=="passage");
+  const rot=seed%cats.length;
+  const rotated=cats.slice(rot).concat(cats.slice(0,rot));
+  const pool=allSentences().filter(s=>s.kind!=="passage" && !doneToday.includes(s.id)&&!plan.find(p=>p.id===s.id));
+  let ci=0, guard=0;
+  while(plan.length<DAILY_TARGET && pool.length && guard<300){
+    const cat=rotated[ci%rotated.length];
+    const cand=pool.find(s=>s.cat===cat && !plan.find(p=>p.id===s.id));
+    if(cand) plan.push(cand);
+    ci++; guard++;
+    if(ci%rotated.length===0 && plan.length<DAILY_TARGET){
+      const rest=pool.find(s=>!plan.find(p=>p.id===s.id));
+      if(rest) plan.push(rest);
+    }
+  }
+  // 3) 结尾固定一段：名人演讲 / 文章片段，按日期轮换
+  const passages=allSentences().filter(s=>s.kind==="passage" && !doneToday.includes(s.id));
+  if(passages.length){
+    const p=passages[seed%passages.length];
+    plan.push(Object.assign({},p,{_passage:true}));
+  }
+  return plan;
+}
+
+/* ==================== 渲染入口 ==================== */
 function render(){
-const s=sentences[idx];
-senEl.innerText=showMode==="en"?s.en:s.cn;
+  const route=currentRoute();
+  document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active", t.dataset.route===route));
+  ["home","library","review","stats","more","practice"].forEach(r=>{
+    document.getElementById("view-"+r).classList.toggle("active", r===route);
+  });
+  const views={home:renderHome, library:renderLibrary, review:renderReview, stats:renderStats, more:renderMore};
+  if(views[route]) views[route]();
+  if(route==="practice") renderPractice();
+  // 顶部连续打卡
+  const badge=document.getElementById("streakBadge");
+  badge.innerHTML = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#D9A441" stroke-width="2"><path d="M12 2c1 3-2 4.5-2 7a4 4 0 0 0 8 0c0-1-.3-1.8-.7-2.5C18 8 19 9.5 19 12a7 7 0 0 1-14 0c0-4 3-6 4-10z"/></svg> 连续 '+calcStreak()+' 天';
 }
-tabs.forEach(b=>{
-b.onclick=()=>{
-tabs.forEach(x=>x.classList.remove("active"));
-b.classList.add("active");
-showMode=b.dataset.type;
-render();
+
+/* ==================== 视图：今日 ==================== */
+function renderHome(){
+  const view=document.getElementById("view-home");
+  const plan=buildDailyPlan();
+  const doneToday=todayHistory();
+  const doneIds=doneToday.map(h=>h.id);
+  const doneCount=plan.filter(p=>doneIds.includes(p.id)).length;
+  const pct=plan.length?Math.round(doneCount/plan.length*100):0;
+  const hour=new Date().getHours();
+  const greet=hour<12?"早上好":hour<18?"下午好":"晚上好";
+  const minutesEstimate=Math.round(plan.reduce((n,s)=>n+(s.kind==="passage"?3.5:2.2),0));
+
+  const cards=plan.map((s,i)=>{
+    const done=doneIds.includes(s.id);
+    const his=doneToday.find(h=>h.id===s.id);
+    const fav=store.fav.includes(s.id);
+    const isP=s.kind==="passage";
+    const cat=CAT_META[s.cat]||CAT_META.daily;
+    const lines=isP?splitSentences(s.en):[s.en];
+    return `<div class="card session-card ${done?"done":""}">
+      <div class="session-index">${done?"✓":(i+1)}</div>
+      <div class="session-body">
+        <div class="session-en">${esc(lines[0].trim())}${isP?" …":""}</div>
+        <div class="session-zh">${esc(s.zh)}</div>
+        <div class="session-tags">
+          <span class="chip ${cat.cls}">${cat.label}</span>
+          <span class="lvl">${LEVEL_META[s.level]||s.level}</span>
+          ${isP?`<span class="chip" style="background:var(--primary-soft);color:var(--primary)">段落 · ${lines.length} 句</span>`:""}
+          ${s._review?'<span class="chip" style="background:var(--bad-soft);color:var(--bad)">错题复习</span>':""}
+          ${his?`<span class="chip" style="background:var(--ok-soft);color:var(--ok)">上次 ${his.score} 分</span>`:""}
+        </div>
+      </div>
+      <div class="session-actions">
+        <button class="icon-btn ${fav?"on":""}" data-fav="${esc(s.id)}" title="收藏">
+          <svg viewBox="0 0 24 24" fill="${fav?"currentColor":"none"}" stroke="currentColor" stroke-width="1.8"><path d="M12 3l2.4 5.3 5.6.6-4.2 3.8 1.2 5.6L12 15.4 7 18.3l1.2-5.6L4 8.9l5.6-.6z"/></svg>
+        </button>
+        <button class="icon-btn" data-practice="${esc(s.id)}" title="跟读">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 15a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3z"/><path d="M19 11a7 7 0 0 1-14 0M12 18v3"/></svg>
+        </button>
+      </div>
+    </div>`;
+  }).join("");
+
+  view.innerHTML=`
+    <div class="card hero">
+      <div class="hero-greet">${greet}，今天也来练几句口语吧</div>
+      <h1>每天 15–30 分钟，把单词说成句子。</h1>
+      <div class="hero-meta">
+        <div class="hero-stat"><div class="num">${doneCount}/${plan.length}</div><div class="lbl">今日已练</div></div>
+        <div class="hero-stat"><div class="num">${todayAvg()||"—"}</div><div class="lbl">今日平均分</div></div>
+        <div class="hero-stat"><div class="num">≈${minutesEstimate}</div><div class="lbl">预计分钟</div></div>
+        <div class="hero-stat"><div class="num">${calcStreak()}</div><div class="lbl">连续打卡</div></div>
+      </div>
+      <div class="plan-progress">
+        <div class="bar"><i style="width:${pct}%"></i></div>
+        <div class="row"><span>今日进度</span><span>${pct}%</span></div>
+      </div>
+      <div class="p-actions" style="margin-top:12px">
+        <button class="btn btn-primary" id="btnStartToday">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          ${doneCount===plan.length?"再练一轮":"开始今日训练"}
+        </button>
+        <button class="btn btn-ghost" id="btnToggleList">今日句子清单</button>
+      </div>
+    </div>
+
+    <div class="daily-block" id="todayListBlock" style="display:none">
+      <div class="session-list">${cards||'<div class="empty">暂无例句，可到「更多 → 导入例句」添加。</div>'}</div>
+    </div>`;
+
+  // 绑定
+  const listBlock=document.getElementById("todayListBlock");
+  const toggleBtn=document.getElementById("btnToggleList");
+  toggleBtn.addEventListener("click",()=>{
+    const open=listBlock.style.display!=="none";
+    listBlock.style.display=open?"none":"block";
+    toggleBtn.textContent=open?"今日句子清单":"收起清单";
+  });
+  view.querySelectorAll("[data-practice]").forEach(b=>b.addEventListener("click",()=>startSession(plan.slice(), b.dataset.practice)));
+  view.querySelectorAll("[data-fav]").forEach(b=>b.addEventListener("click",()=>toggleFav(b.dataset.fav)));
+  document.getElementById("btnStartToday").addEventListener("click",()=>startSession(plan.slice()));
 }
-})
-readBtn.onclick=()=>{
-const utter=new SpeechSynthesisUtterance(sentences[idx].en);
-utter.lang="en-US";
-speechSynthesis.speak(utter);
-logEl.innerText="正在朗读："+sentences[idx].en;
+
+function toggleFav(id){
+  const i=store.fav.indexOf(id);
+  if(i>-1) store.fav.splice(i,1); else store.fav.push(id);
+  saveStore(); render();
 }
-recBtn.onclick=async ()=>{
-if(!("webkitSpeechRecognition" in window)&&!("SpeechRecognition" in window)){
-logEl.innerText="你的浏览器不支持语音识别，推荐Safari";
-return;
+function toggleWrong(id){
+  const i=store.wrong.indexOf(id);
+  if(i>-1) store.wrong.splice(i,1); else store.wrong.push(id);
+  saveStore();
 }
-const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
-const rec=new SpeechRecognition();
-rec.lang="en-US";
-rec.start();
-logEl.innerText="请对着麦克风读句子...";
-rec.onresult=e=>{
-const text=e.results[0][0].transcript.trim().toLowerCase();
-const target=sentences[idx].en.toLowerCase();
-logEl.innerText="识别结果："+text+"\n目标："+sentences[idx].en;
-if(text===target) logEl.innerText+=" ✅ 正确！";
-else logEl.innerText+=" ⚠️ 有差异";
-rec.stop();
+
+/* ==================== 跟读练习 ==================== */
+const session = {list:[], index:0, result:null};
+const rec = {recorder:null, chunks:[], url:null, stream:null, active:false};
+let recognition = null;
+let recogTimer = null;
+
+function startSession(list, startId){
+  session.list = list.filter(Boolean);
+  const idx = startId ? session.list.findIndex(s=>s.id===startId) : -1;
+  session.index = idx>-1 ? idx : 0;
+  session.result = null;
+  if(rec.url){ URL.revokeObjectURL(rec.url); rec.url=null; }
+  navigate("practice");
+  renderPractice();
 }
-rec.onerror=e=>{
-logEl.innerText="识别出错："+e.error;
+
+function currentSentence(){ return session.list[session.index]; }
+
+function renderPractice(){
+  const view=document.getElementById("view-practice");
+  if(!session.list.length){
+    view.innerHTML=`<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 3C6.5 3 2 6.7 2 11.3c0 2.6 1.5 4.9 3.9 6.4-.2 1.2-.8 2.4-1.6 3.3 1.7-.2 3.3-.9 4.5-1.8 1 .3 2.1.5 3.2.5 5.5 0 10-3.7 10-8.2S17.5 3 12 3z"/></svg><div>还没有练习内容</div><button class="btn btn-soft" style="margin-top:14px" onclick="navigate('home')">回到今日训练</button></div>`;
+    return;
+  }
+  const s=currentSentence();
+  const isPassage=s.kind==="passage";
+  const cat=CAT_META[s.cat]||CAT_META.daily;
+  const total=session.list.length;
+  const pct=Math.round((session.index)/total*100);
+  const fav=store.fav.includes(s.id);
+  const wrong=store.wrong.includes(s.id);
+  const rate=store.settings.rate;
+  const lines=isPassage?splitSentences(s.en):[s.en];
+  const sentenceHtml=lines.map(l=>`<div>${esc(l.trim())}</div>`).join("");
+
+  view.innerHTML=`
+    <div class="practice-head">
+      <button class="back" onclick="prevCard()" title="上一句"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <div class="practice-progress">
+        <div class="bar"><i style="width:${pct}%"></i></div>
+        <div class="meta"><span>第 ${session.index+1} / ${total} ${isPassage?"段":"句"}</span><span>${Math.round(pct)}%</span></div>
+      </div>
+    </div>
+
+    <div class="card pcard">
+      <div class="pcard-cat">
+        <span class="chip ${cat.cls}">${cat.label}</span>
+        ${isPassage?'<span class="chip" style="background:var(--primary-soft);color:var(--primary)">段落练习</span>':""}
+        <span class="lvl">${LEVEL_META[s.level]||s.level}</span>
+        ${s.source?`<span class="muted">${esc(s.source)}</span>`:""}
+        <div style="flex:1"></div>
+        <button class="icon-btn ${fav?"on":""}" id="pFav" title="收藏"><svg viewBox="0 0 24 24" fill="${fav?"currentColor":"none"}" stroke="currentColor" stroke-width="1.8"><path d="M12 3l2.4 5.3 5.6.6-4.2 3.8 1.2 5.6L12 15.4 7 18.3l1.2-5.6L4 8.9l5.6-.6z"/></svg></button>
+      </div>
+
+      <div class="p-sentence ${isPassage?"is-passage":""}">${sentenceHtml}</div>
+      <div class="p-zh">${esc(s.zh)}</div>
+      ${s.note?`<div class="p-note"><b>发音提示：</b>${esc(s.note)}</div>`:""}
+
+      <div class="controls">
+        <button class="btn btn-primary" id="btnSpeak">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18 6a8.5 8.5 0 0 1 0 12"/></svg>
+          听示范
+        </button>
+        <div class="rate-group" id="rateGroup">
+          <button data-rate="0.6">慢速</button>
+          <button data-rate="0.9">常速</button>
+          <button data-rate="1.2">轻快</button>
+        </div>
+      </div>
+
+      <div class="word-row" id="wordRow">${renderWords(s)}</div>
+
+      <div class="rec-area">
+        <button class="rec-btn ${rec.active?"recording":""}" id="btnRec" title="录音跟读">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 15a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3z"/><path d="M19 11a7 7 0 0 1-14 0M12 18v3"/></svg>
+        </button>
+        <div class="rec-hint" id="recHint">${isPassage?"点击按钮，连贯朗读整段":"点击按钮，跟读上面的句子"}</div>
+      </div>
+
+      <div class="self-check" id="selfCheck"></div>
+
+      <div class="feedback ${session.result?"show":""}" id="feedback"></div>
+    </div>`;
+
+  // 语速按钮高亮
+  view.querySelectorAll("#rateGroup button").forEach(b=>b.classList.toggle("active", parseFloat(b.dataset.rate)===rate));
+  view.querySelectorAll("#rateGroup button").forEach(b=>b.addEventListener("click",()=>{
+    store.settings.rate=parseFloat(b.dataset.rate); saveStore(); renderPractice(); speak(s.en);
+  }));
+  document.getElementById("btnSpeak").addEventListener("click",()=>speak(s.en));
+  document.getElementById("pFav").addEventListener("click",()=>toggleFav(s.id));
+  document.getElementById("btnRec").addEventListener("click",toggleRecord);
+  renderSelfCheck();
+  renderFeedback();
 }
+
+/* ---------- 环境自检 ---------- */
+function detectPlatform(){
+  const ua=navigator.userAgent;
+  const ios=ua.match(/OS (\d+)[._](\d+)/);
+  if(ios){ return /iPad/.test(ua)?"iPadOS "+ios[1]+"."+ios[2]:"iOS "+ios[1]+"."+ios[2]; }
+  if(/Macintosh/.test(ua)) return "Mac";
+  if(/Android/.test(ua)) return "Android";
+  if(/Win/.test(ua)) return "Windows";
+  return "其他设备";
 }
-nextBtn.onclick=()=>{
-idx=(idx+1)%sentences.length;
-render();
-logEl.innerText="";
+function renderSelfCheck(){
+  const box=document.getElementById("selfCheck");
+  if(!box) return;
+  const secure=location.protocol==="https:";
+  const srOk=!!SR;
+  const lang=store.settings.accent==="UK"?"en-GB":"en-US";
+  box.innerHTML=`
+    <div class="sc-row"><span class="sc-k">识别接口</span><span class="sc-v ${srOk?"ok":"bad"}">${srOk?"可用":"不可用"}</span></div>
+    <div class="sc-row"><span class="sc-k">页面环境</span><span class="sc-v ${secure?"ok":"bad"}">${secure?"HTTPS":"非 HTTPS"}</span></div>
+    <div class="sc-row"><span class="sc-k">系统版本</span><span class="sc-v">${esc(detectPlatform())}</span></div>
+    <div class="sc-row"><span class="sc-k">识别语言</span><span class="sc-v">${lang}</span></div>
+    <div class="sc-row"><span class="sc-k">麦克风权限</span><span class="sc-v warn" id="scPerm">检测中…</span></div>
+    <div class="sc-row"><span class="sc-k">本次识别</span><span class="sc-v warn" id="scTrace">未开始</span></div>`;
+  const permEl=document.getElementById("scPerm");
+  if(!navigator.permissions||!navigator.permissions.query){
+    permEl.textContent="需点击麦克风后授权"; permEl.className="sc-v warn";
+    return;
+  }
+  navigator.permissions.query({name:"microphone"}).then(p=>{
+    const map={granted:["已授权","ok"],denied:["已拒绝","bad"],prompt:["未授权，点麦克风时允许","warn"]};
+    const [txt,cls]=map[p.state]||[p.state,"warn"];
+    permEl.textContent=txt; permEl.className="sc-v "+cls;
+  }).catch(()=>{ permEl.textContent="无法查询权限"; permEl.className="sc-v warn"; });
 }
+let traceLog=[];
+function traceEvent(name, cls){
+  const el=document.getElementById("scTrace");
+  if(!el) return;
+  traceLog.push(name);
+  el.textContent=traceLog.join(" → ");
+  el.className="sc-v "+(cls||"warn");
+}
+
+function renderWords(s){
+  if(session.result && !session.result.manual){
+    const words=session.result.align.target.map(w=>`<span class="w ${w.state}">${esc(w.word)}</span>`).join("");
+    const extras=session.result.align.extras.length?`<span class="muted">＋</span>`+session.result.align.extras.map(e=>`<span class="w extra">${esc(e)}</span>`).join(""):"";
+    return words+extras;
+  }
+  return normalizeWords(s.en).map(w=>`<span class="w match">${esc(w.word)}</span>`).join(" ");
+}
+
+/* ---------- 录音与识别 ---------- */
+function toggleRecord(){
+  if(rec.active){ stopAll(); return; }
+  // 有语音识别接口：只跑识别，不再同时启动 MediaRecorder，避免两条链路抢占音频通道
+  // 注意：iOS Safari 要求 recognition.start() 必须在点击事件的同步调用栈内，因此识别分支保持同步，不走 async
+  if(SR){ startRecognition(); return; }
+  startRecorderFallback();
+}
+async function startRecorderFallback(){
+  // 无识别接口：退化为纯录音 + 手动自评
+  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+    document.getElementById("recHint").textContent="当前浏览器不支持录音，请用 Safari / Chrome。"; return;
+  }
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+    rec.stream=stream; rec.chunks=[];
+    const mime = MediaRecorder.isTypeSupported("audio/mp4") ? "audio/mp4" : "audio/webm";
+    rec.recorder=new MediaRecorder(stream,{mimeType:mime});
+    rec.recorder.ondataavailable=e=>{ if(e.data.size) rec.chunks.push(e.data); };
+    rec.recorder.onstop=finishRecording;
+    rec.recorder.start();
+    rec.active=true;
+    setRecUI(true);
+  }catch(e){
+    document.getElementById("recHint").textContent="无法访问麦克风，请检查浏览器权限后重试。";
+  }
+}
+function setRecUI(on){
+  const btn=document.getElementById("btnRec"); const hint=document.getElementById("recHint");
+  if(btn) btn.classList.toggle("recording", on);
+  if(hint) hint.textContent = on ? "正在聆听，请大声跟读……" : "点击按钮，跟读上面的句子";
+}
+function startRecognition(){
+  if(!SR){ return; }
+  stopAll();
+  rec.active=true;
+  setRecUI(true);
+  const hint=document.getElementById("recHint");
+  if(hint) hint.textContent="准备中，请稍候……";
+
+  const begin=()=>{
+    try{
+      traceLog=[];
+      recognition=new SR();
+      recognition.lang=store.settings.accent==="UK"?"en-GB":"en-US";
+      recognition.interimResults=false;
+      recognition.continuous=false;
+      recognition.maxAlternatives=1;
+      let got=false;
+      let timedOut=false;
+      recogTimer=setTimeout(()=>{
+        timedOut=true;
+        traceEvent("等待超时","warn");
+        /* 不主动 stop/abort：iOS 上一旦切断会话，后续可能持续收不到音频；仅复位按钮，让后台会话自然结束 */
+        rec.active=false;
+        setRecUI(false);
+      },8000);
+
+      recognition.onstart=()=>{ rec.active=true; traceEvent("引擎已启动"); if(hint) hint.textContent="正在聆听，请大声跟读……"; };
+      recognition.onaudiostart=()=>traceEvent("麦克风已开启");
+      recognition.onspeechstart=()=>traceEvent("检测到说话","ok");
+      recognition.onspeechend=()=>traceEvent("说话结束");
+      recognition.onresult=e=>{
+        got=true;
+        if(recogTimer){ clearTimeout(recogTimer); recogTimer=null; }
+        traceEvent("识别成功","ok");
+        applyResult(e.results[0][0].transcript, false);
+      };
+      recognition.onerror=e=>{
+        if(recogTimer){ clearTimeout(recogTimer); recogTimer=null; }
+        traceEvent("错误："+e.error+(e.message?"（"+e.message+"）":""), "bad");
+        let msg;
+        if(e.error==="aborted"){
+          msg=timedOut
+            ? "8 秒内未检测到语音，会话超时结束；若反复如此，请彻底关闭 Safari 后重开"
+            : "识别会话被系统中止；请彻底关闭 Safari 后重开再试";
+        }else{
+          msg={
+            "no-speech":"没有检测到语音，请靠近麦克风再试一次",
+            "service-not-allowed":"识别服务被拦截：请在 Safari 中打开，确认已开启「听写」与麦克风权限",
+            "audio-capture":"未检测到麦克风设备",
+            "network":"识别服务网络异常，请检查网络后重试"
+          }[e.error]||("识别失败："+e.error);
+        }
+        if(hint) hint.textContent=msg;
+        if(!got) applyResult("", false);
+      };
+      recognition.onend=()=>{
+        if(recogTimer){ clearTimeout(recogTimer); recogTimer=null; }
+        rec.active=false;
+        setRecUI(false);
+      };
+      recognition.start();
+    }catch(e){
+      rec.active=false;
+      if(hint) hint.textContent="识别启动失败，请用 Safari 打开本页面";
+    }
+  };
+
+  begin();
+}
+function stopAll(){
+  if(rec.recorder && rec.recorder.state==="recording") rec.recorder.stop();
+  /* 识别前释放朗读占用的音频会话，避免语音合成未退出导致识别会话被 aborted */
+  if("speechSynthesis" in window){ try{ speechSynthesis.cancel(); }catch(e){} }
+  /* iOS 27 workaround：不主动 stop/abort 识别会话，切断后该标签页会持续收不到音频 */
+  if(recogTimer){ clearTimeout(recogTimer); recogTimer=null; }
+  rec.active=false;
+}
+function finishRecording(){
+  rec.active=false;
+  setRecUI(false);
+  if(rec.url) URL.revokeObjectURL(rec.url);
+  const blob=new Blob(rec.chunks,{type:rec.recorder&&rec.recorder.mimeType||"audio/webm"});
+  rec.url=URL.createObjectURL(blob);
+  if(rec.stream){ rec.stream.getTracks().forEach(t=>t.stop()); rec.stream=null; }
+  renderFeedback();
+  // 浏览器不支持识别时，给出手动自评入口
+  if(!SR && !session.result) renderManualRate();
+}
+function applyResult(transcript, manual){
+  const s=currentSentence();
+  if(manual){ session.result={manual:true, score:transcript, transcript:"（手动自评）", align:null, extras:[]}; }
+  else{
+    const align=alignWords(s.en, transcript);
+    session.result={manual:false, transcript:transcript||"", align, score:scoreOf(align)};
+  }
+  renderFeedback();
+}
+function renderManualRate(){
+  const fb=document.getElementById("feedback");
+  if(!fb) return;
+  fb.classList.add("show");
+  fb.innerHTML=`
+    <div class="note-banner" style="margin-bottom:12px">当前浏览器未接入语音识别，可听自己的录音回放后手动评估本次表现。</div>
+    <div class="audio-replay">回放录音 <audio controls src="${rec.url||""}"></audio></div>
+    <div class="p-actions">
+      <button class="btn btn-soft" data-manual="90">读得不错</button>
+      <button class="btn btn-soft" data-manual="70">基本可以</button>
+      <button class="btn btn-soft" data-manual="50">需要重练</button>
+    </div>`;
+  fb.querySelectorAll("[data-manual]").forEach(b=>b.addEventListener("click",()=>applyResult(parseInt(b.dataset.manual,10), true)));
+}
+function renderFeedback(){
+  const fb=document.getElementById("feedback");
+  if(!fb) return;
+  const r=session.result;
+  const s=currentSentence();
+  // 同步刷新卡片上的词级高亮：标红的是没读准/漏掉的词
+  const wr=document.getElementById("wordRow");
+  if(wr && s) wr.innerHTML=renderWords(s);
+  if(!r){ fb.classList.remove("show"); fb.innerHTML=""; return; }
+  const label=scoreLabel(r.score);
+  const color=r.score>=70?"var(--ok)":r.score>=50?"var(--warn)":"var(--bad)";
+  const matchTxt=r.manual?"手动自评":`匹配 ${r.align.matchCount}/${r.align.target.length} 词`;
+  const wrong=store.wrong.includes(s.id);
+  fb.classList.add("show");
+  fb.innerHTML=`
+    <div class="score-ring">
+      <div class="score-num" style="color:${color}">${r.score}</div>
+      <div class="score-labels">
+        <div><b>${label.text}</b></div>
+        <div class="muted">${matchTxt}</div>
+      </div>
+    </div>
+    <div class="transcript-box">
+      <div class="lbl">你说出的内容</div>
+      <div>${esc(r.transcript)||"（未识别到语音，建议先听示范再跟读）"}</div>
+    </div>
+    ${rec.url?`<div class="audio-replay">回放我的录音 <audio controls src="${rec.url}"></audio></div>`:""}
+    <div class="p-actions">
+      <button class="btn btn-ghost" id="btnReplay">再听示范</button>
+      <button class="btn btn-ghost" id="btnRetry">重录一次</button>
+      <button class="btn btn-soft" id="pWrong">${wrong?"移出错题":"加入错题本"}</button>
+      <div style="flex:1"></div>
+      ${session.index>0?'<button class="btn btn-ghost" id="btnPrev">上一句</button>':""}
+      <button class="btn btn-primary" id="btnNext">${session.index<session.list.length-1?"下一句":"完成今日练习"}</button>
+    </div>`;
+  document.getElementById("btnReplay").addEventListener("click",()=>speak(s.en));
+  document.getElementById("btnRetry").addEventListener("click",()=>{ session.result=null; renderPractice(); });
+  document.getElementById("pWrong").addEventListener("click",()=>{ toggleWrong(s.id); renderFeedback(); });
+  const prev=document.getElementById("btnPrev"); if(prev) prev.addEventListener("click",prevCard);
+  document.getElementById("btnNext").addEventListener("click",nextCard);
+}
+function commitCurrent(){
+  const s=currentSentence();
+  if(!s||!session.result) return;
+  const h=todayHistory();
+  h.push({id:s.id, score:session.result.score, ts:Date.now()});
+  store.history[todayKey()]=h;
+  if(session.result.score<60 && !store.wrong.includes(s.id)) store.wrong.push(s.id);
+  saveStore();
+}
+function nextCard(){
+  commitCurrent();
+  if(session.index<session.list.length-1){ session.index++; session.result=null; renderPractice(); }
+  else{ navigate("home"); }
+}
+function prevCard(){ if(session.index>0){ commitCurrent(); session.index--; session.result=null; renderPractice(); } }
+
+/* ==================== 视图：例句库 ==================== */
+const libFilter={cat:"all", level:"all", q:""};
+
+function sentenceCardHTML(s, opts={}){
+  const cat=CAT_META[s.cat]||CAT_META.daily;
+  const fav=store.fav.includes(s.id);
+  const wrong=store.wrong.includes(s.id);
+  const isP=s.kind==="passage";
+  const lines=isP?splitSentences(s.en):[s.en];
+  return `<div class="card lib-card">
+    <div class="lib-top">
+      <div class="lib-en">${esc(lines[0].trim())}${isP?" …":""}</div>
+    </div>
+    <div class="lib-zh">${esc(s.zh)}</div>
+    ${s.note?`<div class="muted" style="margin-bottom:8px">发音提示：${esc(s.note)}</div>`:""}
+    <div class="lib-foot">
+      <span class="chip ${cat.cls}">${cat.label}</span>
+      <span class="lvl">${LEVEL_META[s.level]||s.level}</span>
+      ${isP?`<span class="chip" style="background:var(--primary-soft);color:var(--primary)">段落 · ${lines.length} 句</span>`:""}
+      ${s.source?`<span class="muted">${esc(s.source)}</span>`:""}
+      ${wrong?'<span class="chip" style="background:var(--bad-soft);color:var(--bad)">错题</span>':""}
+      <div class="lib-actions">
+        <button class="icon-btn ${fav?"on":""}" data-fav="${esc(s.id)}" title="收藏"><svg viewBox="0 0 24 24" fill="${fav?"currentColor":"none"}" stroke="currentColor" stroke-width="1.8"><path d="M12 3l2.4 5.3 5.6.6-4.2 3.8 1.2 5.6L12 15.4 7 18.3l1.2-5.6L4 8.9l5.6-.6z"/></svg></button>
+        <button class="icon-btn" data-practice="${esc(s.id)}" title="跟读"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 15a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3z"/><path d="M19 11a7 7 0 0 1-14 0M12 18v3"/></svg></button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderLibrary(){
+  const view=document.getElementById("view-library");
+  const cats=[["all","全部分类"]].concat(Object.entries(CAT_META).map(([k,v])=>[k,v.label]));
+  const levels=[["all","全部难度"],["A2","A2 入门"],["B1","B1 进阶"],["B2","B2 提高"]];
+  const q=libFilter.q.trim().toLowerCase();
+
+  let list=allSentences().filter(s=>{
+    if(libFilter.cat!=="all" && s.cat!==libFilter.cat) return false;
+    if(libFilter.level!=="all" && s.level!==libFilter.level) return false;
+    if(q && !(s.en.toLowerCase().includes(q)||s.zh.toLowerCase().includes(q))) return false;
+    return true;
+  });
+
+  view.innerHTML=`
+    <div class="section-title">例句库</div>
+    <div class="section-desc">共 ${allSentences().length} 句，按分类、难度筛选，或输入英文 / 中文关键词搜索。</div>
+    <div class="toolbar">
+      <div class="search-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="libSearch" type="text" placeholder="搜索例句或释义…" value="${esc(libFilter.q)}">
+      </div>
+    </div>
+    <div class="filter-row" style="margin-bottom:10px">
+      ${cats.map(([k,v])=>`<button class="chip ${libFilter.cat===k?"active":""}" data-cat="${k}">${v}</button>`).join("")}
+    </div>
+    <div class="filter-row" style="margin-bottom:16px">
+      ${levels.map(([k,v])=>`<button class="chip ${libFilter.level===k?"active":""}" data-level="${k}">${v}</button>`).join("")}
+    </div>
+    <div class="lib-list">${list.map(s=>sentenceCardHTML(s)).join("")||'<div class="empty">没有匹配的例句。</div>'}</div>`;
+
+  view.querySelectorAll("[data-cat]").forEach(b=>b.addEventListener("click",()=>{libFilter.cat=b.dataset.cat;renderLibrary();}));
+  view.querySelectorAll("[data-level]").forEach(b=>b.addEventListener("click",()=>{libFilter.level=b.dataset.level;renderLibrary();}));
+  document.getElementById("libSearch").addEventListener("input",e=>{libFilter.q=e.target.value;renderLibrary();document.getElementById("libSearch").focus();});
+  view.querySelectorAll("[data-practice]").forEach(b=>b.addEventListener("click",()=>startSession(list, b.dataset.practice)));
+  view.querySelectorAll("[data-fav]").forEach(b=>b.addEventListener("click",()=>toggleFav(b.dataset.fav)));
+}
+
+/* ==================== 视图：复习（收藏 / 错题） ==================== */
+function renderReview(){
+  const view=document.getElementById("view-review");
+  const fav=store.fav.map(findSentence).filter(Boolean);
+  const wrong=store.wrong.map(findSentence).filter(Boolean);
+  const block=(title, desc, items, key)=>`
+    <div class="daily-block">
+      <h2>${title} <span class="muted" style="font-weight:400">${items.length} 句</span></h2>
+      <div class="section-desc">${desc}</div>
+      <div class="lib-list">${items.map(s=>sentenceCardHTML(s)).join("")||'<div class="empty">暂无内容</div>'}</div>
+    </div>`;
+  view.innerHTML=`
+    <div class="section-title">复习本</div>
+    <div class="section-desc">收藏喜欢的句子，错题本集中存放发音待加强的句子，优先复习。</div>
+    ${block("错题本","得分低于 60 的句子会自动收录，也可手动加入。",wrong,"wrong")}
+    ${block("我的收藏","练过觉得有用、想反复跟读的句子。",fav,"fav")}`;
+  const reviewPool=[...wrong, ...fav.filter(f=>!wrong.some(w=>w.id===f.id))];
+  view.querySelectorAll("[data-practice]").forEach(b=>b.addEventListener("click",()=>startSession(reviewPool, b.dataset.practice)));
+  view.querySelectorAll("[data-fav]").forEach(b=>b.addEventListener("click",()=>toggleFav(b.dataset.fav)));
+}
+
+/* ==================== 视图：统计 ==================== */
+function renderStats(){
+  const view=document.getElementById("view-stats");
+  const week=last7Days();
+  const max=Math.max(1,...week.map(d=>d.count));
+  const weekHtml=week.map(d=>`
+    <div class="week-row">
+      <span class="muted">周${d.label}</span>
+      <div class="week-bar"><i style="width:${Math.round(d.count/max*100)}%"></i></div>
+      <span class="muted">${d.count?d.count+" 句":"—"}</span>
+    </div>`).join("");
+  view.innerHTML=`
+    <div class="section-title">学习统计</div>
+    <div class="section-desc">数据保存在本机浏览器，仅用于个人回顾。</div>
+    <div class="stat-grid">
+      <div class="card stat-cell"><div class="num">${totalDone()}</div><div class="lbl">累计练习句数</div></div>
+      <div class="card stat-cell"><div class="num">${avgScore()||"—"}</div><div class="lbl">历史平均分</div></div>
+      <div class="card stat-cell"><div class="num">${calcStreak()}</div><div class="lbl">连续打卡天数</div></div>
+      <div class="card stat-cell"><div class="num">${store.fav.length}</div><div class="lbl">收藏</div></div>
+      <div class="card stat-cell"><div class="num">${store.wrong.length}</div><div class="lbl">待巩固错题</div></div>
+      <div class="card stat-cell"><div class="num">${allSentences().length}</div><div class="lbl">词库总量</div></div>
+    </div>
+    <div class="card week-chart">
+      <div class="section-title" style="font-size:16px">近 7 天练习量</div>
+      ${weekHtml}
+    </div>`;
+}
+
+/* ==================== 导出 / 导入 ==================== */
+function collectExport(scope){
+  if(scope==="fav") return store.fav.map(findSentence).filter(Boolean);
+  if(scope==="wrong") return store.wrong.map(findSentence).filter(Boolean);
+  if(scope==="today") return todayHistory().map(h=>findSentence(h.id)).filter(Boolean);
+  return allSentences();
+}
+function csvQ(v){ v=String(v==null?"":v); return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; }
+function toTXT(items){
+  return items.map((s,i)=>`${i+1}. ${s.en}\n   释义：${s.zh}${s.source?"\n   出处："+s.source:""}${s.note?"\n   发音："+s.note:""}`).join("\n\n");
+}
+function toCSV(items){
+  const head="id,english,chinese,category,level,note";
+  const rows=items.map(s=>[s.id,csvQ(s.en),csvQ(s.zh),s.cat,s.level,csvQ(s.note||"")].join(","));
+  return "\uFEFF"+[head].concat(rows).join("\n");
+}
+function toMD(items){
+  return ["# 口语练习例句导出","", "| 英文 | 中文 | 分类 | 难度 |","|---|---|---|---|"]
+    .concat(items.map(s=>`| ${String(s.en).replace(/\|/g,"/")} | ${String(s.zh).replace(/\|/g,"/")} | ${(CAT_META[s.cat]||{}).label||s.cat} | ${s.level||""} |`))
+    .join("\n");
+}
+function downloadFile(name, content, mime){
+  const blob=new Blob([content],{type:mime});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob); a.download=name; document.body.appendChild(a); a.click();
+  setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },1000);
+}
+function parseImport(text){
+  const trimmed=text.trim();
+  if(!trimmed) return [];
+  let arr;
+  if(trimmed.startsWith("[")){ arr=JSON.parse(trimmed); }
+  else{
+    arr=trimmed.split(/\n+/).filter(Boolean).map(line=>{
+      const idx=line.indexOf("|");
+      return idx>-1?{en:line.slice(0,idx).trim(),zh:line.slice(idx+1).trim()}:{en:line.trim(),zh:""};
+    });
+  }
+  const out=[];
+  arr.forEach((s,i)=>{
+    if(!s.en) return;
+    out.push({
+      id:"imp-"+Date.now()+"-"+i,
+      kind:s.kind==="passage"?"passage":"sentence",
+      en:s.en, zh:s.zh||"",
+      cat:CAT_META[s.cat]?s.cat:"daily",
+      level:LEVEL_META[s.level]?s.level:"B1",
+      tags:s.tags||[], note:s.note||"", source:s.source||""
+    });
+  });
+  return out;
+}
+
+/* ==================== 视图：更多 ==================== */
+function renderMore(){
+  const view=document.getElementById("view-more");
+  const accent=store.settings.accent, rate=store.settings.rate;
+  view.innerHTML=`
+    <div class="section-title">更多</div>
+    <div class="section-desc">导出例句、扩充自己的词库，以及语音与数据设置。</div>
+
+    <div class="menu-list">
+      <div class="card menu-item">
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v12m0 0 4-4m-4 4-4-4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg></div>
+        <div class="meta"><h3>导出例句</h3><p>把收藏、错题、今日已练或全部例句存成文件。</p></div>
+      </div>
+      <div class="card" style="padding:16px">
+        <div class="settings-row" style="border-bottom:none">
+          <span>导出范围</span>
+          <select id="expScope">
+            <option value="all">全部例句</option>
+            <option value="fav">我的收藏</option>
+            <option value="wrong">错题本</option>
+            <option value="today">今日已练</option>
+          </select>
+        </div>
+        <div class="export-group">
+          <button class="btn btn-soft" data-exp="txt">导出 TXT</button>
+          <button class="btn btn-soft" data-exp="csv">导出 CSV</button>
+          <button class="btn btn-soft" data-exp="md">导出 Markdown</button>
+          <button class="btn btn-ghost" id="expCopy">复制到剪贴板</button>
+        </div>
+      </div>
+
+      <div class="card menu-item">
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 15V3m0 0 4 4m-4-4L8 7"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg></div>
+        <div class="meta"><h3>导入自己的例句</h3><p>支持 JSON 数组，或每行一句、英文与中文用「|」分隔的文本。</p></div>
+      </div>
+      <div class="card" style="padding:16px">
+        <textarea id="importText" placeholder='JSON 句子：[{"en":"Where are you from?","zh":"你来自哪里？","cat":"daily","level":"A2"}]\n\nJSON 段落（kind 填 passage，可放新闻/演讲稿）：\n[{"kind":"passage","en":"Two or three sentences here. Another sentence follows.","zh":"段落大意。","cat":"passage","level":"B2","source":"你自己的素材"}]\n\n或纯文本每行一句：\nWhere are you from? | 你来自哪里？'></textarea>
+        <div class="export-group">
+          <label class="btn btn-ghost" style="cursor:pointer">选择文件<input type="file" id="importFile" accept=".txt,.json" hidden></label>
+          <button class="btn btn-primary" id="btnImport">导入例句</button>
+          <span class="muted" id="importMsg"></span>
+        </div>
+      </div>
+
+      <div class="card menu-item">
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg></div>
+        <div class="meta"><h3>语音设置</h3><p>示范发音的口音与默认语速。</p></div>
+      </div>
+      <div class="card" style="padding:6px 16px">
+        <div class="settings-row">
+          <span>示范口音</span>
+          <select id="setAccent">
+            <option value="US" ${accent==="US"?"selected":""}>美音（en-US）</option>
+            <option value="UK" ${accent==="UK"?"selected":""}>英音（en-GB）</option>
+          </select>
+        </div>
+        <div class="settings-row">
+          <span>默认语速</span>
+          <select id="setRate">
+            <option value="0.6" ${rate===0.6?"selected":""}>慢速 0.6</option>
+            <option value="0.9" ${rate===0.9?"selected":""}>常速 0.9</option>
+            <option value="1.2" ${rate===1.2?"selected":""}>轻快 1.2</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="card menu-item">
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></div>
+        <div class="meta"><h3>数据管理</h3><p>记录仅保存在本机浏览器，可清空后重新开始。</p></div>
+      </div>
+      <div class="card" style="padding:16px">
+        <div class="export-group">
+          <button class="btn btn-ghost" id="btnClearRecord">清空练习记录与错题</button>
+          <button class="btn btn-ghost" id="btnClearAll">恢复出厂（含收藏与导入）</button>
+        </div>
+      </div>
+    </div>`;
+
+  // 导出
+  view.querySelectorAll("[data-exp]").forEach(b=>b.addEventListener("click",()=>{
+    const items=collectExport(document.getElementById("expScope").value);
+    if(!items.length){ alert("当前范围没有可导出的内容。"); return; }
+    const fmt=b.dataset.exp;
+    const content=fmt==="csv"?toCSV(items):fmt==="md"?toMD(items):toTXT(items);
+    const mime=fmt==="csv"?"text/csv;charset=utf-8":fmt==="md"?"text/markdown;charset=utf-8":"text/plain;charset=utf-8";
+    downloadFile("口语例句-"+todayKey()+"."+fmt, content, mime);
+  }));
+  document.getElementById("expCopy").addEventListener("click",async()=>{
+    const items=collectExport(document.getElementById("expScope").value);
+    if(!items.length){ alert("当前范围没有可复制的内容。"); return; }
+    const content=toTXT(items);
+    try{ await navigator.clipboard.writeText(content); alert("已复制到剪贴板。"); }
+    catch(e){ alert("复制失败，请改用导出文件。"); }
+  });
+
+  // 导入
+  const fileInput=document.getElementById("importFile");
+  fileInput.addEventListener("change",e=>{
+    const f=e.target.files[0]; if(!f) return;
+    const reader=new FileReader();
+    reader.onload=()=>{ document.getElementById("importText").value=reader.result; };
+    reader.readAsText(f);
+  });
+  document.getElementById("btnImport").addEventListener("click",()=>{
+    const msg=document.getElementById("importMsg");
+    let arr;
+    try{ arr=parseImport(document.getElementById("importText").value); }
+    catch(e){ msg.textContent="解析失败：JSON 格式有误。"; msg.style.color="var(--bad)"; return; }
+    if(!arr.length){ msg.textContent="没有可导入的句子。"; msg.style.color="var(--bad)"; return; }
+    const existing=new Set(allSentences().map(s=>s.en));
+    const fresh=arr.filter(s=>!existing.has(s.en));
+    store.imported=store.imported.concat(fresh);
+    saveStore();
+    msg.textContent=`成功导入 ${fresh.length} 句${fresh.length<arr.length?"，"+(arr.length-fresh.length)+" 句重复已跳过":""}。`;
+    msg.style.color="var(--ok)";
+    document.getElementById("importText").value="";
+  });
+
+  // 设置
+  document.getElementById("setAccent").addEventListener("change",e=>{ store.settings.accent=e.target.value; saveStore(); });
+  document.getElementById("setRate").addEventListener("change",e=>{ store.settings.rate=parseFloat(e.target.value); saveStore(); });
+
+  // 数据管理
+  document.getElementById("btnClearRecord").addEventListener("click",()=>{
+    if(!confirm("确定清空全部练习记录、错题与打卡统计吗？收藏保留。")) return;
+    store.history={}; store.wrong=[]; store.minutes={}; saveStore(); render();
+  });
+  document.getElementById("btnClearAll").addEventListener("click",()=>{
+    if(!confirm("确定恢复出厂？收藏、导入的例句和全部记录都会被清除。")) return;
+    localStorage.removeItem(STORE_KEY); store=loadStore(); render();
+  });
+}
+
+/* ==================== 初始化 ==================== */
+document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>navigate(t.dataset.route)));
 render();
 </script>
 </body>
