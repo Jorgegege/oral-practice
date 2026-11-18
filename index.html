@@ -1,306 +1,113 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>oral-practice 跟读版</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>英语口语练习</title>
 <style>
-*{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
-body{background:#f8f5ee;color:#333;padding:16px;min-height:100vh;padding-bottom:100px}
-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
-.title{display:flex;align-items:center;gap:8px;font-size:22px;font-weight:600}
-.streak{background:#e8f5e9;color:#2e7d32;padding:4px 10px;border-radius:999px;font-size:14px}
-.card{background:#fff;border-radius:20px;padding:20px;box-shadow:0 2px 12px #00000010;margin-bottom:20px}
-.progress-bar{height:10px;background:#eee;border-radius:999px;margin-top:10px;overflow:hidden}
-.progress-fill{height:100%;background:#79b8ff;width:0%}
-.tab-view{display:none}
-.tab-view.active{display:block}
-.sentence-en{font-size:24px;margin:12px 0;line-height:1.6}
-.sentence-cn{color:#666;font-size:16px;margin-bottom:16px}
-.result-text{margin:12px 0;padding:12px;background:#f0f7ff;border-radius:12px}
-.score{font-size:28px;font-weight:bold;color:#2563eb;margin:8px 0}
-.tip{color:#888;font-size:14px;margin-top:8px}
-.btn-row{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0}
-button{padding:12px 16px;border:none;border-radius:14px;font-size:15px;cursor:pointer}
-.btn-primary{background:#2563eb;color:#fff}
-.btn-success{background:#22c55e;color:#fff}
-.btn-warning{background:#f59e0b;color:#fff}
-.btn-danger{background:#ef4444;color:#fff}
-.btn-default{background:#eee}
-footer{position:fixed;bottom:0;left:0;right:0;background:#fff;display:flex;border-top:1px solid #eee}
-footer button{flex:1;background:transparent;color:#666;border-radius:0;padding:14px 0}
-footer button.active{color:#2563eb;font-weight:500}
-.list-item{padding:14px;border-bottom:1px solid #eee}
-.hit{color:#22c55e}
-.miss{color:#ef4444}
+*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,sans-serif}
+body{background:#f5f7fa;color:#222;padding:16px;max-width:700px;margin:0 auto}
+header{text-align:center;margin-bottom:20px}
+h1{font-size:22px;margin-bottom:8px}
+.tab{display:flex;gap:6px;margin-bottom:16px}
+.tab button{flex:1;padding:10px;border:none;border-radius:8px;background:#e8edf6;font-size:15px;cursor:pointer}
+.tab button.active{background:#2b65d9;color:#fff}
+.box{background:#fff;border-radius:12px;padding:16px;box-shadow:0 2px 8px #00000012;margin-bottom:16px}
+.sentence{font-size:18px;line-height:1.6;margin-bottom:12px}
+.ctrl{display:flex;gap:8px;flex-wrap:wrap}
+button{padding:10px 14px;border-radius:8px;border:none;background:#2b65d9;color:#fff;cursor:pointer;font-size:14px}
+button.secondary{background:#e2e8f0;color:#222}
+.info{font-size:13px;color:#666;margin-top:10px}
+#log{margin-top:12px;font-size:13px;color:#444;min-height:60px}
 </style>
 </head>
 <body>
 <header>
-<div class="title">💬 oral-practice 跟读版</div>
-<div class="streak">连续 <span id="streak">0</span> 天</div>
+<h1>英语口语练习</h1>
 </header>
-
-<div id="tab-today" class="tab-view active">
-<div class="card">
-<h2>今日计划（15-30 分钟）</h2>
-<div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+<div class="tab">
+<button class="active" data-type="en">英文句子</button>
+<button data-type="cn">中文对照</button>
 </div>
-
-<div class="card" id="practice-card">
-<div id="sentence-en" class="sentence-en"></div>
-<div id="sentence-cn" class="sentence-cn"></div>
-<div id="score-box" class="score"></div>
-<div id="result-box" class="result-text"></div>
-<div class="tip">
-提示：需要系统开启听写；如果只成功一次，请关闭标签页重开
+<div class="box">
+<div class="sentence" id="sentence">Click 开始</div>
+<div class="ctrl">
+<button id="readBtn">朗读</button>
+<button id="recBtn" class="secondary">录音识别</button>
+<button id="nextBtn" class="secondary">下一句</button>
 </div>
-<div class="btn-row">
-<button id="btn-read" class="btn-primary">🔊 播放原句</button>
-<button id="btn-recognize" class="btn-success">🎤 跟读识别</button>
-<button id="btn-fav" class="btn-warning">⭐ 收藏</button>
-<button id="btn-wrong" class="btn-danger">❌ 加入错题</button>
+<div id="log"></div>
 </div>
-<div class="btn-row">
-<button id="btn-next" class="btn-default">下一句</button>
+<div class="box info">
+<p>提示：苹果Safari打开，需要允许麦克风权限；识别效果受网络、发音影响</p>
 </div>
-</div>
-</div>
-
-<div id="tab-library" class="tab-view">
-<div class="card">
-<h2>词库</h2>
-<div id="lib-list"></div>
-</div>
-</div>
-
-<div id="tab-review" class="tab-view">
-<div class="card">
-<h2>复习（收藏+错题）</h2>
-<div id="review-list"></div>
-</div>
-</div>
-
-<div id="tab-stat" class="tab-view">
-<div class="card">
-<h2>统计</h2>
-<p>今日完成：<span id="done-count">0</span></p>
-<p>收藏：<span id="fav-count">0</span></p>
-<p>错题：<span id="wrong-count">0</span></p>
-</div>
-</div>
-
-<footer>
-<button data-tab="today" class="active">🏠 今日</button>
-<button data-tab="library">📖 词库</button>
-<button data-tab="review">⭐ 复习</button>
-<button data-tab="stat">📊 统计</button>
-</footer>
-
 <script>
-const baseLibrary = [
-  { en: "The early bird catches the worm.", cn: "早起的鸟儿有虫吃。" },
-  { en: "Where there is a will, there is a way.", cn: "有志者事竟成。" },
-  { en: "Practice makes perfect.", cn: "熟能生巧。" },
-  { en: "Every coin has two sides.", cn: "凡事都有两面性。" },
-  { en: "Don't put off till tomorrow what you can do today.", cn: "今日事今日毕。" },
-  { en: "Failure is the mother of success.", cn: "失败是成功之母。" },
-  { en: "Seeing is believing.", cn: "眼见为实。" },
-  { en: "A friend in need is a friend indeed.", cn: "患难见真情。" },
-  { en: "Knowledge is power.", cn: "知识就是力量。" },
-  { en: "Nothing is impossible.", cn: "一切皆有可能。" }
+const sentences = [
+{en:"I get up at seven every morning.",cn:"我每天早上七点起床。"},
+{en:"What are you going to do this weekend?",cn:"你这个周末打算做什么？"},
+{en:"I like reading books in my free time.",cn:"我空闲的时候喜欢看书。"},
+{en:"The weather is nice today.",cn:"今天天气很好。"},
+{en:"Could you help me please?",cn:"可以请你帮我一下吗？"},
+{en:"I’m learning English now.",cn:"我现在正在学英语。"},
+{en:"Where do you come from?",cn:"你来自哪里？"},
+{en:"How much does it cost?",cn:"这个多少钱？"},
+{en:"I will try my best.",cn:"我会尽我最大努力。"},
+{en:"See you tomorrow.",cn:"明天见。"}
 ];
-
-let state = JSON.parse(localStorage.getItem("oralState")) || {
-  favorites: [],
-  wrongs: [],
-  done: [],
-  streak: 0,
-  lastDay: ""
-};
-let currentSentence = null;
-let isBusy = false;
-let speakComplete = true;
-
-const $ = s => document.querySelector(s);
-const $$ = s => document.querySelectorAll(s);
-
-function saveState() {
-  localStorage.setItem("oralState", JSON.stringify(state));
-  renderAll();
+let idx=0;
+let showMode="en";
+const senEl=document.getElementById("sentence");
+const logEl=document.getElementById("log");
+const readBtn=document.getElementById("readBtn");
+const recBtn=document.getElementById("recBtn");
+const nextBtn=document.getElementById("nextBtn");
+const tabs=document.querySelectorAll(".tab button");
+function render(){
+const s=sentences[idx];
+senEl.innerText=showMode==="en"?s.en:s.cn;
 }
-
-function switchView(tabName) {
-  $$(".tab-view").forEach(el => el.classList.remove("active"));
-  $$("footer button").forEach(el => el.classList.remove("active"));
-  $("#tab-" + tabName).classList.add("active");
-  $$(`footer button[data-tab="${tabName}"]`)[0].classList.add("active");
+tabs.forEach(b=>{
+b.onclick=()=>{
+tabs.forEach(x=>x.classList.remove("active"));
+b.classList.add("active");
+showMode=b.dataset.type;
+render();
 }
-$$("footer button").forEach(btn => {
-  btn.onclick = () => switchView(btn.dataset.tab);
-});
-
-function loadRandomSentence() {
-  const idx = Math.floor(Math.random() * baseLibrary.length);
-  currentSentence = baseLibrary[idx];
-  $("#sentence-en").innerText = currentSentence.en;
-  $("#sentence-cn").innerText = currentSentence.cn;
-  $("#score-box").innerText = "";
-  $("#result-box").innerHTML = "";
+})
+readBtn.onclick=()=>{
+const utter=new SpeechSynthesisUtterance(sentences[idx].en);
+utter.lang="en-US";
+speechSynthesis.speak(utter);
+logEl.innerText="正在朗读："+sentences[idx].en;
 }
-
-async function speakText(text) {
-  return new Promise(resolve => {
-    speakComplete = false;
-    speechSynthesis.cancel();
-    const utter = new SpeechSynthesisUtterance(text);
-    utter.lang = "en-US";
-    utter.onend = () => {
-      speakComplete = true;
-      resolve();
-    };
-    utter.onerror = () => {
-      speakComplete = true;
-      resolve();
-    };
-    speechSynthesis.speak(utter);
-  });
+recBtn.onclick=async ()=>{
+if(!("webkitSpeechRecognition" in window)&&!("SpeechRecognition" in window)){
+logEl.innerText="你的浏览器不支持语音识别，推荐Safari";
+return;
 }
-
-$("#btn-read").onclick = async () => {
-  if (!currentSentence || isBusy) return;
-  isBusy = true;
-  await speakText(currentSentence.en);
-  isBusy = false;
-};
-
-function calcSimilarity(a, b) {
-  const sa = a.toLowerCase().replace(/[.,!?]/g, "").split(/\s+/);
-  const sb = b.toLowerCase().replace(/[.,!?]/g, "").split(/\s+/);
-  const setA = new Set(sa);
-  const matchCount = sb.filter(w => setA.has(w)).length;
-  return sa.length ? Math.round((matchCount / sa.length) * 100) : 0;
+const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+const rec=new SpeechRecognition();
+rec.lang="en-US";
+rec.start();
+logEl.innerText="请对着麦克风读句子...";
+rec.onresult=e=>{
+const text=e.results[0][0].transcript.trim().toLowerCase();
+const target=sentences[idx].en.toLowerCase();
+logEl.innerText="识别结果："+text+"\n目标："+sentences[idx].en;
+if(text===target) logEl.innerText+=" ✅ 正确！";
+else logEl.innerText+=" ⚠️ 有差异";
+rec.stop();
 }
-
-function highlightResult(origin, user) {
-  const oWords = origin.toLowerCase().replace(/[.,!?]/g, "").split(/\s+/);
-  const uSet = new Set(user.toLowerCase().replace(/[.,!?]/g, "").split(/\s+/));
-  return oWords
-    .map(w =>
-      uSet.has(w)
-        ? `<span class="hit">${w}</span>`
-        : `<span class="miss">${w}</span>`
-    )
-    .join(" ");
+rec.onerror=e=>{
+logEl.innerText="识别出错："+e.error;
 }
-
-$("#btn-recognize").onclick = async () => {
-  if (isBusy || !speakComplete) {
-    alert("正在播放，请等待结束后再试");
-    return;
-  }
-
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SpeechRecognition) {
-    alert("当前浏览器不支持 SpeechRecognition，请使用 Safari");
-    return;
-  }
-
-  isBusy = true;
-  $("#btn-recognize").innerText = "🎙️ 正在监听...";
-
-  const recognition = new SpeechRecognition();
-  recognition.lang = "en-US";
-  recognition.continuous = false;
-  recognition.interimResults = false;
-  recognition.maxAlternatives = 1;
-
-  let timer = setTimeout(() => {
-    recognition.abort();
-  }, 8000);
-
-  recognition.onresult = e => {
-    clearTimeout(timer);
-    const userText = e.results[0][0].transcript.trim();
-    const score = calcSimilarity(currentSentence.en, userText);
-    $("#score-box").innerText = `得分：${score} 分`;
-    $("#result-box").innerHTML = `
-      你说：${userText}<br/>
-      对照：${highlightResult(currentSentence.en, userText)}
-    `;
-  };
-
-  recognition.onend = () => {
-    clearTimeout(timer);
-    isBusy = false;
-    $("#btn-recognize").innerText = "🎤 跟读识别";
-  };
-
-  recognition.onerror = err => {
-    clearTimeout(timer);
-    isBusy = false;
-    $("#btn-recognize").innerText = "🎤 跟读识别";
-    if (err.error === "no-speech") {
-      $("#result-box").innerText = "未检测到语音，请重试";
-    } else if (err.error === "aborted") {
-      $("#result-box").innerText = "超时中断；iOS 如果反复失败，请关闭标签页重开";
-    } else {
-      $("#result-box").innerText = `识别错误：${err.error}`;
-    }
-  };
-
-  recognition.start();
-};
-
-$("#btn-fav").onclick = () => {
-  if (!currentSentence) return;
-  const has = state.favorites.find(x => x.en === currentSentence.en);
-  if (!has) {
-    state.favorites.push(currentSentence);
-    saveState();
-    alert("已收藏");
-  }
-};
-
-$("#btn-wrong").onclick = () => {
-  if (!currentSentence) return;
-  const has = state.wrongs.find(x => x.en === currentSentence.en);
-  if (!has) {
-    state.wrongs.push(currentSentence);
-    saveState();
-    alert("加入错题");
-  }
-};
-
-$("#btn-next").onclick = () => {
-  if (currentSentence) {
-    const hasDone = state.done.find(x => x.en === currentSentence.en);
-    if (!hasDone) state.done.push(currentSentence);
-  }
-  loadRandomSentence();
-  saveState();
-};
-
-function renderAll() {
-  $("#streak").innerText = state.streak;
-  $("#done-count").innerText = state.done.length;
-  $("#fav-count").innerText = state.favorites.length;
-  $("#wrong-count").innerText = state.wrongs.length;
-  const total = baseLibrary.length;
-  const done = state.done.length;
-  $("#progress").style.width = (total ? (done / total) * 100 : 0) + "%";
-
-  $("#lib-list").innerHTML = baseLibrary
-    .map(i => `<div class="list-item"><div>${i.en}</div><div style="color:#666">${i.cn}</div></div>`)
-    .join("");
-  const review = [...state.favorites, ...state.wrongs];
-  $("#review-list").innerHTML = review
-    .map(i => `<div class="list-item"><div>${i.en}</div><div style="color:#666">${i.cn}</div></div>`)
-    .join("");
 }
-
-loadRandomSentence();
-renderAll();
+nextBtn.onclick=()=>{
+idx=(idx+1)%sentences.length;
+render();
+logEl.innerText="";
+}
+render();
 </script>
 </body>
 </html>
